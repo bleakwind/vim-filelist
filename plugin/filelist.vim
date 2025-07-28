@@ -634,6 +634,35 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     endfunction
 
     " --------------------------------------------------
+    " filelist#OpenExternal
+    " --------------------------------------------------
+    function! filelist#OpenExternal() abort
+        let l:node = filelist#GetNode()
+        if !empty(l:node) && has_key(l:node, 'path')
+            if has('unix')
+                if l:node.type == 'fold'
+                    silent execute '!xdg-open "' . l:node.path . '"'
+                else
+                    let l:dir = fnamemodify(l:node.path, ':h')
+                    silent execute '!xdg-open "' . l:dir . '"'
+                endif
+            elseif has('macunix')
+                if l:node.type == 'fold'
+                    silent execute '!open "' . l:node.path . '"'
+                else
+                    silent execute '!open -R "' . l:node.path . '"'
+                endif
+            elseif has('win32')
+                if l:node.type == 'fold'
+                    silent execute '!start explorer "' . substitute(l:node.path, '/', '\', 'g') . '"'
+                else
+                    silent execute '!start explorer /select,"' . substitute(l:node.path, '/', '\', 'g') . '"'
+                endif
+            endif
+        endif
+    endfunction
+
+    " --------------------------------------------------
     " filelist#CollectPath
     " --------------------------------------------------
     function! filelist#CollectPath(node, paths) abort
@@ -824,6 +853,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             nnoremap <silent> <buffer> C             :call filelist#SetNodepath()<CR>
             nnoremap <silent> <buffer> U             :call filelist#SetUppath()<CR>
             nnoremap <silent> <buffer> R             :call filelist#RefreshList()<CR>
+            nnoremap <silent> <buffer> E             :call filelist#OpenExternal()<CR>
             nnoremap <silent> <buffer> .             :call filelist#ToggleHidden()<CR>
 
             nnoremap <silent> <buffer> B             :<C-U>call filelist#BookmarkToggle()<CR>
