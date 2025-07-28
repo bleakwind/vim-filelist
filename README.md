@@ -87,6 +87,7 @@ let g:filelist_hlbmlisttitle = '#92BDE8'
 | C                         | Change root directory to current node                     |
 | U                         | Move up one directory level                               |
 | R                         | Refresh the file list                                     |
+| E                         | external open directory                                   |
 | .                         | Toggle hidden files visibility                            |
 | B                         | Toggle bookmark view                                      |
 | mi                        | Add current file/directory to bookmarks                   |
