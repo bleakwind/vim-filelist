@@ -174,6 +174,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " filelist#FilelistLoad
     " --------------------------------------------------
     function! filelist#FilelistLoad(root) abort
+        if isdirectory(a:root)
+            execute 'cd '.fnameescape(a:root)
+        endif
         let s:filelist_filedata = {
                     \ 'name'     : a:root == '/' ? '/' : fnamemodify(a:root, ':t'),
                     \ 'path'     : a:root,
