@@ -490,7 +490,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                     call filelist#OpenFile(l:node.path)
                 endif
             " handle normal folder/file
-            elseif has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file')
+            elseif has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file' || l:node.type == 'execute' || l:node.type == 'symlink')
                 if l:node.type == 'fold'
                     let l:node.expand = !l:node.expand
                     if l:node.expand | call filelist#FilelistBuild(l:node) | endif
@@ -593,7 +593,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                                 call filelist#OpenFile(l:node.path)
                             endif
                         endif
-                    elseif has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file')
+                    elseif has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file' || l:node.type == 'execute' || l:node.type == 'symlink')
                         if l:type == 9
                             if l:node.type == 'fold'
                                 let l:node.expand = !l:node.expand
@@ -751,7 +751,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                         silent execute '!start explorer /select,"' . substitute(l:node.path, '/', '\', 'g') . '"'
                     endif
                 endif
-            elseif has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file')
+            elseif has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file' || l:node.type == 'execute' || l:node.type == 'symlink')
                 if l:node.type == 'fold'
                     if has('unix')
                         silent execute '!xdg-open "' . l:node.path . '"'
@@ -1261,7 +1261,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
         if exists('s:filelist_bmstate') && s:filelist_bmstate
             " check node
             let l:node = filelist#GetNode()
-            if has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file' || l:node.type == 'bfold' || l:node.type == 'bfile')
+            if has_key(l:node, 'type') && (l:node.type == 'bfold' || l:node.type == 'bfile' || l:node.type == 'fold' || l:node.type == 'file' || l:node.type == 'execute' || l:node.type == 'symlink')
 
                 " set new list
                 let l:items = []
