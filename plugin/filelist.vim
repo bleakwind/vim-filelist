@@ -106,16 +106,19 @@ let s:filelist_bmfile               = g:filelist_bmpath.'/bookmark'
 let s:filelist_bmdata               = {}
 let s:filelist_helpstate            = 0
 let s:filelist_helpdata             = get(s:, 'filelist_helpdata', [
-            \ { 'key': 'o/<CR>', 'des': 'Open file/Toggle directory expansion and contraction' },
-            \ { 'key': 'C     ', 'des': 'Set current directory as main path' },
-            \ { 'key': 'U     ', 'des': 'Return to parent directory' },
-            \ { 'key': 'R     ', 'des': 'Refresh file list' },
-            \ { 'key': 'E     ', 'des': 'Open in external program' },
-            \ { 'key': '.     ', 'des': 'Toggle display of hidden files' },
-            \ { 'key': 'B     ', 'des': 'Switch to bookmark view' },
-            \ { 'key': 'mi    ', 'des': 'Add to bookmark' },
-            \ { 'key': 'md    ', 'des': 'Delete from bookmark' },
-            \ { 'key': '?     ', 'des': 'Switch to help information' },
+            \ { 'key': 'o/<CR>  ', 'des': 'Open file/directory or toggle expansion' },
+            \ { 'key': 'sg-click', 'des': 'Mouse Single Click: Selects file/directory (highlights it) ' },
+            \ { 'key': 'db-click', 'des': 'Mouse Double Click: Open file/directory or toggle expansion' },
+            \ { 'key': 'mk-click', 'des': 'Mouse Single Click marker: Open file/directory or toggle expansion' },
+            \ { 'key': 'C       ', 'des': 'Set current directory as main path' },
+            \ { 'key': 'U       ', 'des': 'Move up one directory level' },
+            \ { 'key': 'R       ', 'des': 'Refresh the file list' },
+            \ { 'key': 'E       ', 'des': 'Open in external program' },
+            \ { 'key': '.       ', 'des': 'Toggle display hidden files' },
+            \ { 'key': 'B       ', 'des': 'Toggle display bookmark' },
+            \ { 'key': 'mi      ', 'des': 'Add current file/directory to bookmarks' },
+            \ { 'key': 'md      ', 'des': 'Delete from bookmark' },
+            \ { 'key': '?       ', 'des': 'Switch to help message' },
             \ ])
 
 " ============================================================================

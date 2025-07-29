@@ -84,17 +84,18 @@ let g:filelist_hlbmlisttitle = '#92BDE8'
 | Key                       | Action                                                    |
 | ------------------------- | --------------------------------------------------------- |
 | o or Enter                | Open file/directory or toggle expansion                   |
-| C                         | Change root directory to current node                     |
+| Mouse Single Click        | Selects file/directory (highlights it)                    |
+| Mouse Double Click        | Open file/directory or toggle expansion                   |
+| Mouse Single Click marker | Open file/directory or toggle expansion                   |
+| C                         | Set current directory as main path                        |
 | U                         | Move up one directory level                               |
 | R                         | Refresh the file list                                     |
-| E                         | external open directory                                   |
-| .                         | Toggle hidden files visibility                            |
-| B                         | Toggle bookmark view                                      |
+| E                         | Open in external program                                  |
+| .                         | Toggle display hidden files                               |
+| B                         | Toggle display bookmark                                   |
 | mi                        | Add current file/directory to bookmarks                   |
-| md                        | Remove current bookmark                                   |
-| Mouse Single Click        | Selects file/directory (highlights it)                    |
-| Mouse Double Click        | Opens file or toggles directory expand/collapse           |
-| Mouse Single Click marker | Expands/collapses directory (same as pressing Enter or o) |
+| md                        | Delete from bookmark                                      |
+| ?                         | Switch to help message                                    |
 
 ## License
 BSD 2-Clause - See LICENSE file
