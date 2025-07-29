@@ -43,6 +43,9 @@ let g:filelist_hlfiledefault        = get(g:, 'filelist_hlfiledefault',       '#
 let g:filelist_hlfileexecute        = get(g:, 'filelist_hlfileexecute',       '#EEBE77')
 let g:filelist_hlfilesymlink        = get(g:, 'filelist_hlfilesymlink',       '#95D475')
 let g:filelist_hlbmlisttitle        = get(g:, 'filelist_hlbmlisttitle',       '#92BDE8')
+let g:filelist_hlhelplisttitle      = get(g:, 'filelist_hlhelplisttitle',     '#95D475')
+let g:filelist_hlhelplistkey        = get(g:, 'filelist_hlhelplistkey',       '#EEBE77')
+let g:filelist_hlhelplistdes        = get(g:, 'filelist_hlhelplistdes',       '#92BDE8')
 
 " file mark
 let g:filelist_mark                 = get(g:, 'filelist_mark', {})
@@ -58,6 +61,7 @@ let g:filelist_attr.file_default    = get(g:filelist_attr, 'file_default',    nr
 let g:filelist_attr.file_execute    = get(g:filelist_attr, 'file_execute',    nr2char(0x1F4D9))
 let g:filelist_attr.file_symlink    = get(g:filelist_attr, 'file_symlink',    nr2char(0x1F517))
 let g:filelist_attr.bmlist_title    = get(g:filelist_attr, 'bmlist_title',    nr2char(0x1F516))
+let g:filelist_attr.helplist_title  = get(g:filelist_attr, 'helplist_title',  nr2char(0x2753))
 
 " file type
 let g:filelist_type                 = get(g:, 'filelist_type', {})
@@ -96,10 +100,23 @@ let g:filelist_type.type_yaml       = get(g:filelist_type, 'type_yaml',       { 
 let s:filelist_bufnbr               = -1
 let s:filelist_winidn               = -1
 let s:filelist_msetimer             = 0
-let s:filelist_filedata             = {}
+let s:filelist_fldata               = {}
 let s:filelist_bmstate              = 0
 let s:filelist_bmfile               = g:filelist_bmpath.'/bookmark'
 let s:filelist_bmdata               = {}
+let s:filelist_helpstate            = 0
+let s:filelist_helpdata             = get(s:, 'filelist_helpdata', [
+            \ { 'key': 'o/<CR>', 'des': 'Open file/Toggle directory expansion and contraction' },
+            \ { 'key': 'C     ', 'des': 'Set current directory as main path' },
+            \ { 'key': 'U     ', 'des': 'Return to parent directory' },
+            \ { 'key': 'R     ', 'des': 'Refresh file list' },
+            \ { 'key': 'E     ', 'des': 'Open in external program' },
+            \ { 'key': '.     ', 'des': 'Toggle display of hidden files' },
+            \ { 'key': 'B     ', 'des': 'Switch to bookmark view' },
+            \ { 'key': 'mi    ', 'des': 'Add to bookmark' },
+            \ { 'key': 'md    ', 'des': 'Delete from bookmark' },
+            \ { 'key': '?     ', 'des': 'Switch to help information' },
+            \ ])
 
 " ============================================================================
 " filelist detail
@@ -133,11 +150,16 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                 for id in w:filelist_highlight
                     silent! call matchdelete(id)
                 endfor
-                let w:filelist_highlight = []
             endif
+            let w:filelist_highlight = []
 
             " init data
             let l:lines = []
+
+            " build helpdata
+            if exists('s:filelist_helpstate') && s:filelist_helpstate
+                call filelist#HelpRender(l:lines)
+            endif
 
             " build bmdata
             call filelist#BookmarkLoad()
@@ -145,11 +167,11 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                 call filelist#BookmarkRender(l:lines)
             endif
 
-            " build filedata
-            if !exists('s:filelist_filedata') || empty(s:filelist_filedata)
+            " build fldata
+            if !exists('s:filelist_fldata') || empty(s:filelist_fldata)
                 call filelist#FilelistLoad(g:filelist_mainpath)
             endif
-            call filelist#FilelistRender(s:filelist_filedata, l:lines, 0)
+            call filelist#FilelistRender(s:filelist_fldata, l:lines, 0)
 
             " setbufvar filelist
             call setbufvar(s:filelist_bufnbr, '&modifiable', 1)
@@ -177,14 +199,14 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
         if isdirectory(a:root)
             execute 'cd '.fnameescape(a:root)
         endif
-        let s:filelist_filedata = {
+        let s:filelist_fldata = {
                     \ 'name'     : a:root == '/' ? '/' : fnamemodify(a:root, ':t'),
                     \ 'path'     : a:root,
                     \ 'type'     : 'fold',
                     \ 'expand'   : 1,
                     \ 'children' : []
                     \ }
-        call filelist#FilelistBuild(s:filelist_filedata)
+        call filelist#FilelistBuild(s:filelist_fldata)
     endfunction
 
     " --------------------------------------------------
@@ -239,7 +261,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             let w:filelist_highlight = []
         endif
 
-        " fold icon
+        " render data
         if a:node.type == 'fold'
             if a:node.expand
                 let l:mark = g:filelist_mark.expanded
@@ -278,12 +300,12 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             endif
         endif
 
-        " set line
+        " set data
         let l:disname = a:level == 0 && has_key(a:node, 'path') ? a:node.name.' - '.a:node.path : a:node.name
         let l:data_line = l:prefix.l:mark.' '.l:icon.' '.l:disname
         call add(a:lines, l:data_line)
 
-        " hl filelist
+        " hl data
         let l:line_num = len(a:lines)
 
         let l:mark_col = len(l:prefix) + 1
@@ -328,66 +350,63 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     function! filelist#GetNode(...) abort
         " get message
         let l:node_line = getline('.')
+        let l:offset_line = 0
 
         " handle bookmark
         if exists('s:filelist_bmstate') && s:filelist_bmstate
+            if exists('s:filelist_helpstate') && s:filelist_helpstate
+                let l:offset_line += len(s:filelist_helpdata) + 2
+            endif
+            let l:process_line = l:offset_line + 1
+
             let l:bmdata = filelist#BookmarkLoad()
-            if !empty(l:bmdata.items)
+            if !empty(l:bmdata)
                 let l:current_line = line('.')
-                let l:header_line = 1
-                if l:current_line > l:header_line && l:current_line <= (len(l:bmdata.items) + l:header_line)
-                    return l:bmdata.items[l:current_line - l:header_line - 1]
-                elseif l:current_line <= l:header_line || l:current_line == (len(l:bmdata.items) + l:header_line + 1)
+                if l:current_line > l:process_line && l:current_line <= (l:process_line + len(l:bmdata))
+                    return l:bmdata[l:current_line - l:process_line - 1]
+                elseif l:current_line <= l:process_line || l:current_line == (l:process_line + len(l:bmdata) + 1)
                     return {}
                 endif
             endif
         endif
 
-        " set something
-        let l:indent = len(matchstr(l:node_line, '^\s*')) / 2
-        let l:path = split(l:node_line, ' ')[1:]
-        let l:name = join(l:path, ' ')
-
-        let l:current_node = s:filelist_filedata
-        let l:current_line = 1
-        let l:found_node = 0
-
-        " handle bookmark
+        " handle filelist
+        let l:found_fldata = 0
         if exists('s:filelist_bmstate') && s:filelist_bmstate
-            let l:bmdata = filelist#BookmarkLoad()
-            let l:current_line += len(l:bmdata.items) + 2
+            let l:offset_line += len(l:bmdata) + 2
         endif
+        let l:process_line = l:offset_line + 1
 
-        " loop file
+        let l:fldata = s:filelist_fldata
         while 1
             " if found
-            if l:current_line == line('.')
-                let l:found_node = 1
+            if l:process_line == line('.')
+                let l:found_fldata = 1
                 break
             endif
             " sub node
-            if l:current_node.expand && has_key(l:current_node, 'children') && !empty(l:current_node.children)
-                let l:current_node = l:current_node.children[0]
-                let l:current_line += 1
+            if l:fldata.expand && has_key(l:fldata, 'children') && !empty(l:fldata.children)
+                let l:fldata = l:fldata.children[0]
+                let l:process_line += 1
             " node list
             else
-                while has_key(l:current_node, 'parent')
-                    let l:par = l:current_node.parent
-                    let l:idx = index(l:par.children, l:current_node)
+                while has_key(l:fldata, 'parent')
+                    let l:par = l:fldata.parent
+                    let l:idx = index(l:par.children, l:fldata)
                     if l:idx < len(l:par.children) - 1
-                        let l:current_node = l:par.children[l:idx + 1]
-                        let l:current_line += 1
+                        let l:fldata = l:par.children[l:idx + 1]
+                        let l:process_line += 1
                         break
                     else
-                        let l:current_node = l:par
+                        let l:fldata = l:par
                     endif
                 endwhile
-                if !has_key(l:current_node, 'parent')
+                if !has_key(l:fldata, 'parent')
                     break
                 endif
             endif
         endwhile
-        return l:found_node ? l:current_node : {}
+        return l:found_fldata ? l:fldata : {}
     endfunction
 
     " --------------------------------------------------
@@ -437,7 +456,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#OpenNode(...) abort
         " save cursor
-        let l:winidn = win_getid()
+        let l:orig_winidn = win_getid()
         let l:current_cursor = getpos('.')
 
         " operate node
@@ -454,31 +473,24 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                     execute 'cd '.fnameescape(l:node.path)
                     call cursor(1, 1)
                     call filelist#RefreshList()
-
-                    " restore cursor
-                    if win_id2win(l:winidn) != 0
-                        call win_gotoid(l:winidn)
-                        call setpos('.', l:current_cursor)
-                    endif
                 else
                     call filelist#OpenFile(l:node.path)
                 endif
             " handle normal folder/file
-            elseif has_key(l:node, 'name') && has_key(l:node, 'path')
+            elseif has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file')
                 if l:node.type == 'fold'
                     let l:node.expand = !l:node.expand
                     if l:node.expand | call filelist#FilelistBuild(l:node) | endif
                     call filelist#WinDatalist()
-
-                    " restore cursor
-                    if win_id2win(l:winidn) != 0
-                        call win_gotoid(l:winidn)
-                        call setpos('.', l:current_cursor)
-                    endif
                 else
                     call filelist#OpenFile(l:node.path)
                 endif
             endif
+        endif
+        " restore cursor
+        if win_id2win(l:orig_winidn) != 0
+            call win_gotoid(l:orig_winidn)
+            call setpos('.', l:current_cursor)
         endif
     endfunction
 
@@ -486,8 +498,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " filelist#MouseNode
     " --------------------------------------------------
     function! filelist#MouseNode(...) abort
-        " get message
+        " save cursor
         let l:orig_winidn = win_getid()
+        let l:current_cursor = getpos('.')
 
         " check mouse
         let l:type = (a:0 > 0 && a:1 == 1) ? 1 : 2
@@ -521,31 +534,65 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                 " click node
                 let l:node = filelist#GetNode()
                 if !empty(l:node)
-                    if l:type == 9
-                        if l:node.type == 'fold'
-                            let l:node.expand = !l:node.expand
-                            if l:node.expand | call filelist#FilelistBuild(l:node) | endif
-                            call filelist#WinDatalist()
+                    if has_key(l:node, 'type') && (l:node.type == 'bfold' || l:node.type == 'bfile')
+                        if l:type == 1
+                            if !filereadable(l:node.path) && !isdirectory(l:node.path)
+                                "let l:prompt_bok = "The bookmark not found: ".l:node.path
+                                "echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                            elseif l:node.type == 'bfold'
+                                "let g:filelist_mainpath = l:node.path
+                                "execute 'cd '.fnameescape(l:node.path)
+                                "call cursor(1, 1)
+                                "call filelist#RefreshList()
+                            else
+                                "call filelist#OpenFile(l:node.path)
+                            endif
+                        elseif l:type == 2
+                            if !filereadable(l:node.path) && !isdirectory(l:node.path)
+                                let l:prompt_bok = "The bookmark not found: ".l:node.path
+                                echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                            elseif l:node.type == 'bfold'
+                                let g:filelist_mainpath = l:node.path
+                                execute 'cd '.fnameescape(l:node.path)
+                                call cursor(1, 1)
+                                call filelist#RefreshList()
+                            else
+                                call filelist#OpenFile(l:node.path)
+                            endif
                         endif
-                    elseif l:type == 1
-                        if l:node.type == 'fold'
-                            "let l:node.expand = !l:node.expand
-                            "if l:node.expand | call filelist#FilelistBuild(l:node) | endif
-                            "call filelist#WinDatalist()
-                        else
-                            "call filelist#OpenFile(l:node.path)
-                        endif
-                    else
-                        if l:node.type == 'fold'
-                            let l:node.expand = !l:node.expand
-                            if l:node.expand | call filelist#FilelistBuild(l:node) | endif
-                            call filelist#WinDatalist()
-                        else
-                            call filelist#OpenFile(l:node.path)
+                    elseif has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file')
+                        if l:type == 9
+                            if l:node.type == 'fold'
+                                let l:node.expand = !l:node.expand
+                                if l:node.expand | call filelist#FilelistBuild(l:node) | endif
+                                call filelist#WinDatalist()
+                            endif
+                        elseif l:type == 1
+                            if l:node.type == 'fold'
+                                "let l:node.expand = !l:node.expand
+                                "if l:node.expand | call filelist#FilelistBuild(l:node) | endif
+                                "call filelist#WinDatalist()
+                            else
+                                "call filelist#OpenFile(l:node.path)
+                            endif
+                        elseif l:type == 2
+                            if l:node.type == 'fold'
+                                let l:node.expand = !l:node.expand
+                                if l:node.expand | call filelist#FilelistBuild(l:node) | endif
+                                call filelist#WinDatalist()
+                            else
+                                call filelist#OpenFile(l:node.path)
+                            endif
                         endif
                     endif
+
                 endif
             endif
+        endif
+        " restore cursor
+        if win_id2win(l:orig_winidn) != 0
+            call win_gotoid(l:orig_winidn)
+            call setpos('.', l:current_cursor)
         endif
     endfunction
 
@@ -553,18 +600,18 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " filelist#RefreshList
     " --------------------------------------------------
     function! filelist#RefreshList(...) abort
-        if exists('s:filelist_filedata')
+        if exists('s:filelist_fldata')
             " save line
             let l:current_line = line('.')
             let l:current_col = col('.')
             let l:current_topline = line('w0')
 
             " save state
-            let l:expand_path = filelist#GetPath(s:filelist_filedata)
+            let l:expand_path = filelist#GetPath(s:filelist_fldata)
 
             " refresh list
             call filelist#FilelistLoad(g:filelist_mainpath)
-            call filelist#RestorePath(s:filelist_filedata, l:expand_path)
+            call filelist#RestorePath(s:filelist_fldata, l:expand_path)
             call filelist#WinDatalist()
 
             " restore cursor
@@ -599,7 +646,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     function! filelist#SetUppath() abort
         " save list
         let l:paths = []
-        call filelist#CollectPath(s:filelist_filedata, l:paths)
+        call filelist#CollectPath(s:filelist_fldata, l:paths)
 
         " save cursor
         let l:saved_pos = getpos('.')
@@ -619,7 +666,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
         call filelist#FilelistLoad(g:filelist_mainpath)
 
         " restore save list
-        call filelist#RestorePath(s:filelist_filedata, l:paths)
+        call filelist#RestorePath(s:filelist_fldata, l:paths)
 
         " refresh
         call filelist#WinDatalist()
@@ -638,25 +685,47 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#OpenExternal() abort
         let l:node = filelist#GetNode()
-        if !empty(l:node) && has_key(l:node, 'path')
-            if has('unix')
-                if l:node.type == 'fold'
-                    silent execute '!xdg-open "' . l:node.path . '"'
+        if !empty(l:node)
+            if has_key(l:node, 'type') && (l:node.type == 'bfold' || l:node.type == 'bfile')
+                if !filereadable(l:node.path) && !isdirectory(l:node.path)
+                    let l:prompt_bok = "The bookmark not found: ".l:node.path
+                    echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                elseif l:node.type == 'bfold'
+                    if has('unix')
+                        silent execute '!xdg-open "' . l:node.path . '"'
+                    elseif has('macunix')
+                        silent execute '!open "' . l:node.path . '"'
+                    elseif has('win32')
+                        silent execute '!start explorer "' . substitute(l:node.path, '/', '\', 'g') . '"'
+                    endif
                 else
-                    let l:dir = fnamemodify(l:node.path, ':h')
-                    silent execute '!xdg-open "' . l:dir . '"'
+                    if has('unix')
+                        let l:dir = fnamemodify(l:node.path, ':h')
+                        silent execute '!xdg-open "' . l:dir . '"'
+                    elseif has('macunix')
+                        silent execute '!open -R "' . l:node.path . '"'
+                    elseif has('win32')
+                        silent execute '!start explorer /select,"' . substitute(l:node.path, '/', '\', 'g') . '"'
+                    endif
                 endif
-            elseif has('macunix')
+            elseif has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file')
                 if l:node.type == 'fold'
-                    silent execute '!open "' . l:node.path . '"'
+                    if has('unix')
+                        silent execute '!xdg-open "' . l:node.path . '"'
+                    elseif has('macunix')
+                        silent execute '!open "' . l:node.path . '"'
+                    elseif has('win32')
+                        silent execute '!start explorer "' . substitute(l:node.path, '/', '\', 'g') . '"'
+                    endif
                 else
-                    silent execute '!open -R "' . l:node.path . '"'
-                endif
-            elseif has('win32')
-                if l:node.type == 'fold'
-                    silent execute '!start explorer "' . substitute(l:node.path, '/', '\', 'g') . '"'
-                else
-                    silent execute '!start explorer /select,"' . substitute(l:node.path, '/', '\', 'g') . '"'
+                    if has('unix')
+                        let l:dir = fnamemodify(l:node.path, ':h')
+                        silent execute '!xdg-open "' . l:dir . '"'
+                    elseif has('macunix')
+                        silent execute '!open -R "' . l:node.path . '"'
+                    elseif has('win32')
+                        silent execute '!start explorer /select,"' . substitute(l:node.path, '/', '\', 'g') . '"'
+                    endif
                 endif
             endif
         endif
@@ -734,37 +803,37 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                     call filelist#RefreshList()
 
                     " ready node
-                    let l:current_node = s:filelist_filedata
+                    let l:fldata = s:filelist_fldata
                     call cursor(1, 1)
 
                     " loop path
                     for il in l:path_list
                         " ready node expand
-                        if l:current_node.type == 'fold' && !l:current_node.expand
-                            let l:current_node.expand = 1
-                            call filelist#FilelistBuild(l:current_node)
+                        if l:fldata.type == 'fold' && !l:fldata.expand
+                            let l:fldata.expand = 1
+                            call filelist#FilelistBuild(l:fldata)
                             call filelist#WinDatalist()
                         endif
                         " find subnode
-                        let l:found_node = 0
-                        for child in l:current_node.children
+                        let l:found_fldata = 0
+                        for child in l:fldata.children
                             if child.name ==# il
-                                let l:current_node = child
+                                let l:fldata = child
                                 let l:current_line = filelist#LocateLine(child)
                                 call cursor(l:current_line, 1)
                                 normal! zz
-                                let l:found_node = 1
+                                let l:found_fldata = 1
                                 break
                             endif
                         endfor
                         " if not found
-                        if !l:found_node
+                        if !l:found_fldata
                             break
                         endif
                     endfor
 
                     " move cursor
-                    if l:current_node.path ==# l:current_file
+                    if l:fldata.path ==# l:current_file
                         let l:data_line = getline('.')
                         let l:name_start = matchend(l:data_line, '^\s*.\s.\s') + 1
                         call cursor(line('.'), l:name_start)
@@ -778,33 +847,41 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " filelist#LocateLine
     " --------------------------------------------------
     function! filelist#LocateLine(node) abort
-        let l:current_node = s:filelist_filedata
-        let l:current_line = 1
+        let l:offset = 0
+        if exists('s:filelist_helpstate') && s:filelist_helpstate
+            let l:offset += len(s:filelist_helpdata) + 2
+        endif
+        if exists('s:filelist_bmstate') && s:filelist_bmstate
+            let l:offset += len(s:filelist_bmdata) + 2
+        endif
+
+        let l:fldata = s:filelist_fldata
+        let l:current_line = 1 + l:offset
 
         " loop list
         while 1
             " if found
-            if l:current_node == a:node
+            if l:fldata == a:node
                 break
             endif
             " sub node
-            if l:current_node.expand && has_key(l:current_node, 'children') && !empty(l:current_node.children)
-                let l:current_node = l:current_node.children[0]
+            if l:fldata.expand && has_key(l:fldata, 'children') && !empty(l:fldata.children)
+                let l:fldata = l:fldata.children[0]
                 let l:current_line += 1
             " node list
             else
-                while has_key(l:current_node, 'parent')
-                    let l:par = l:current_node.parent
-                    let l:idx = index(l:par.children, l:current_node)
+                while has_key(l:fldata, 'parent')
+                    let l:par = l:fldata.parent
+                    let l:idx = index(l:par.children, l:fldata)
                     if l:idx < len(l:par.children) - 1
-                        let l:current_node = l:par.children[l:idx + 1]
+                        let l:fldata = l:par.children[l:idx + 1]
                         let l:current_line += 1
                         break
                     else
-                        let l:current_node = l:par
+                        let l:fldata = l:par
                     endif
                 endwhile
-                if !has_key(l:current_node, 'parent')
+                if !has_key(l:fldata, 'parent')
                     break
                 endif
             endif
@@ -845,8 +922,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             endif
 
             " set keymap
-            nnoremap <silent> <buffer> <CR>          :call filelist#OpenNode()<CR>
             nnoremap <silent> <buffer> o             :call filelist#OpenNode()<CR>
+            nnoremap <silent> <buffer> <CR>          :call filelist#OpenNode()<CR>
             nnoremap <silent> <buffer> <LeftRelease> :<C-U>call timer_start(200, {-> filelist#MouseNode(1)})<CR>
             nnoremap <silent> <buffer> <2-LeftMouse> :<C-U>call filelist#MouseNode(2)<CR>
 
@@ -859,6 +936,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             nnoremap <silent> <buffer> B             :<C-U>call filelist#BookmarkToggle()<CR>
             nnoremap <silent> <buffer> mi            :<C-U>call filelist#BookmarkInsert()<CR>
             nnoremap <silent> <buffer> md            :<C-U>call filelist#BookmarkDelete()<CR>
+
+            nnoremap <silent> <buffer> ?             :<C-U>call filelist#HelpToggle()<CR>
 
             " set autocmd
             augroup FilelistAutoCommands
@@ -941,14 +1020,14 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
         endif
 
         " set title
+        let l:prefix = repeat('  ', 0)
         let l:mark = g:filelist_mark.expanded
         let l:icon = g:filelist_attr.bmlist_title
         let l:hl_name = 'FilelistHlBmlistTitle'
-        let l:prefix = repeat('  ', 0)
-        let l:data_line = g:filelist_mark.expanded.' '.g:filelist_attr.bmlist_title.' Bookmarks'
+        let l:data_line = l:prefix.l:mark.' '.l:icon.' Bookmarks'
         call add(a:lines, l:data_line)
 
-        " hl filelist
+        " hl title
         let l:line_num = len(a:lines)
 
         let l:mark_col = len(l:prefix) + 1
@@ -966,9 +1045,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
         let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]])
         call add(w:filelist_highlight, l:cont_id)
 
-        " loop bmdata
-        if !empty(s:filelist_bmdata.items)
-            for il in s:filelist_bmdata.items
+        " render data
+        if !empty(s:filelist_bmdata)
+            for il in s:filelist_bmdata
 
                 " fold icon
                 if il.type == 'bfold'
@@ -1000,12 +1079,12 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                     endif
                 endif
 
-                " set line
+                " set data
                 let l:prefix = repeat('  ', 1)
                 let l:data_line = l:prefix.l:mark.' '.l:icon.' '.il.name.' '.il.path
                 call add(a:lines, l:data_line)
 
-                " hl filelist
+                " hl data
                 let l:line_num = len(a:lines)
 
                 let l:mark_col = len(l:prefix) + 1
@@ -1032,7 +1111,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " filelist#BookmarkLoad
     " --------------------------------------------------
     function! filelist#BookmarkLoad() abort
-        let s:filelist_bmdata.items = []
+        let s:filelist_bmdata = []
 
         " check dir
         if !isdirectory(g:filelist_bmpath)
@@ -1047,7 +1126,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                 if len(l:parts) >= 2
                     let l:name = substitute(l:parts[0], "\u0001", ' ', 'g')
                     let l:path = substitute(join(l:parts[1:]), "\u0001", ' ', 'g')
-                    call add(s:filelist_bmdata.items, {
+                    call add(s:filelist_bmdata, {
                                 \ 'name': l:name,
                                 \ 'path': l:path,
                                 \ 'type': isdirectory(l:path) ? 'bfold' : 'bfile'
@@ -1063,7 +1142,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#BookmarkSave() abort
         let l:lines = []
-        for il in s:filelist_bmdata.items
+        for il in s:filelist_bmdata
             let l:name = substitute(il.name, ' ', '\\ ', 'g')
             let l:path = substitute(il.path, ' ', '\\ ', 'g')
             call add(l:lines, l:name.' '.l:path)
@@ -1107,7 +1186,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
         " check name
         if !empty(l:name_ipt)
             " check exists
-            for il in s:filelist_bmdata.items
+            for il in s:filelist_bmdata
                 if il.path ==# l:path
                     let l:prompt_ext = "\nThis bookmark already exists: ".l:name_ipt." -> ".l:path
                     echohl FilelistPmtError | echo l:prompt_ext | echohl None
@@ -1116,7 +1195,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             endfor
 
             " add bmdata
-            call add(s:filelist_bmdata.items, {
+            call add(s:filelist_bmdata, {
                         \ 'name': l:name_ipt,
                         \ 'path': l:path,
                         \ 'type': isdirectory(l:path) ? 'bfold' : 'bfile'
@@ -1139,12 +1218,12 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
         if exists('s:filelist_bmstate') && s:filelist_bmstate
             " check node
             let l:node = filelist#GetNode()
-            if !empty(l:node) && has_key(l:node, 'path')
+            if has_key(l:node, 'type') && (l:node.type == 'fold' || l:node.type == 'file' || l:node.type == 'bfold' || l:node.type == 'bfile')
 
                 " set new list
                 let l:items = []
                 let l:removed = 0
-                for il in s:filelist_bmdata.items
+                for il in s:filelist_bmdata
                     if il.path !=# l:node.path || il.name !=# l:node.name
                         call add(l:items, il)
                     else
@@ -1154,7 +1233,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
 
                 " update list
                 if l:removed
-                    let s:filelist_bmdata.items = l:items
+                    let s:filelist_bmdata = l:items
                     call filelist#BookmarkSave()
                     call filelist#WinDatalist()
 
@@ -1195,6 +1274,98 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             call filelist#BookmarkClose()
         else
             call filelist#BookmarkOpen()
+        endif
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#HelpRender
+    " --------------------------------------------------
+    function! filelist#HelpRender(lines) abort
+        " init highlight
+        if !exists('w:filelist_highlight')
+            let w:filelist_highlight = []
+        endif
+
+        " set title
+        let l:prefix = repeat('  ', 0)
+        let l:mark = g:filelist_mark.expanded
+        let l:icon = g:filelist_attr.helplist_title
+        let l:hl_name = 'FilelistHlHelplistTitle'
+        let l:data_line = l:prefix.l:mark.' '.l:icon.' Help'
+        call add(a:lines, l:data_line)
+
+        " hl title
+        let l:line_num = len(a:lines)
+
+        let l:mark_col = len(l:prefix) + 1
+        let l:mark_width = strlen(l:mark)
+        let l:mark_id = matchaddpos('FilelistHlSetMark', [[l:line_num, l:mark_col, l:mark_width]])
+        call add(w:filelist_highlight, l:mark_id)
+
+        let l:icon_col = len(l:prefix) + strlen(l:mark) + 1 + 1
+        let l:icon_width = strlen(l:icon)
+        let l:icon_id = matchaddpos('FilelistHlSetIcon', [[l:line_num, l:icon_col, l:icon_width]])
+        call add(w:filelist_highlight, l:icon_id)
+
+        let l:cont_col = len(l:prefix) + strlen(l:mark) + 1 + strlen(l:icon) + 1 + 1
+        let l:cont_width = strlen(l:data_line) - (l:cont_col - 1)
+        let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]])
+        call add(w:filelist_highlight, l:cont_id)
+
+        " render data
+        for item in s:filelist_helpdata
+
+            " set data
+            let l:prefix = repeat('  ', 1)
+            let l:key = item.key
+            let l:cont = item.des
+            let l:data_line = l:prefix.l:key.' '.l:cont
+            call add(a:lines, l:data_line)
+
+            " hl data
+            let l:line_num = len(a:lines)
+
+            let l:key_col = len(l:prefix) + 1
+            let l:key_width = strlen(l:key)
+            let l:key_id = matchaddpos('FilelistHlHelplistKey', [[l:line_num, l:key_col, l:key_width]])
+            call add(w:filelist_highlight, l:key_id)
+
+            let l:cont_col = len(l:prefix) + strlen(l:key) + 1 + 1
+            let l:cont_width = strlen(l:cont)
+            let l:cont_id = matchaddpos('FilelistHlHelplistDes', [[l:line_num, l:cont_col, l:cont_width]])
+            call add(w:filelist_highlight, l:cont_id)
+        endfor
+        call add(a:lines, "")
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#HelpOpen
+    " --------------------------------------------------
+    function! filelist#HelpOpen() abort
+        if !exists('s:filelist_helpstate') || !s:filelist_helpstate
+            let s:filelist_helpstate = 1
+            call filelist#RefreshList()
+        endif
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#HelpClose
+    " --------------------------------------------------
+    function! filelist#HelpClose() abort
+        if exists('s:filelist_helpstate') && s:filelist_helpstate
+            let s:filelist_helpstate = 0
+            call filelist#RefreshList()
+        endif
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#HelpToggle
+    " --------------------------------------------------
+    function! filelist#HelpToggle() abort
+        if exists('s:filelist_helpstate') && s:filelist_helpstate
+            call filelist#HelpClose()
+        else
+            call filelist#HelpOpen()
         endif
     endfunction
 
@@ -1416,24 +1587,30 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     function! filelist#SetHlcolor(...) abort
         " check bgcolor
         let l:gbg = !empty(synIDattr(hlID('Normal'), 'bg', 'gui'))   ? synIDattr(hlID('Normal'), 'bg', 'gui')   : '#171C22'
-        let l:hlsetmark     = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlsetmark)     : g:filelist_hlsetmark
-        let l:hlseticon     = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlseticon)     : g:filelist_hlseticon
-        let l:hlfoldclose   = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfoldclose)   : g:filelist_hlfoldclose
-        let l:hlfoldopen    = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfoldopen)    : g:filelist_hlfoldopen
-        let l:hlfiledefault = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfiledefault) : g:filelist_hlfiledefault
-        let l:hlfileexecute = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfileexecute) : g:filelist_hlfileexecute
-        let l:hlfilesymlink = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfilesymlink) : g:filelist_hlfilesymlink
-        let l:hlbmlisttitle = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlbmlisttitle) : g:filelist_hlbmlisttitle
+        let l:hlsetmark       = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlsetmark)       : g:filelist_hlsetmark
+        let l:hlseticon       = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlseticon)       : g:filelist_hlseticon
+        let l:hlfoldclose     = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfoldclose)     : g:filelist_hlfoldclose
+        let l:hlfoldopen      = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfoldopen)      : g:filelist_hlfoldopen
+        let l:hlfiledefault   = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfiledefault)   : g:filelist_hlfiledefault
+        let l:hlfileexecute   = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfileexecute)   : g:filelist_hlfileexecute
+        let l:hlfilesymlink   = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlfilesymlink)   : g:filelist_hlfilesymlink
+        let l:hlbmlisttitle   = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlbmlisttitle)   : g:filelist_hlbmlisttitle
+        let l:hlhelplisttitle = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlhelplisttitle) : g:filelist_hlhelplisttitle
+        let l:hlhelplistkey   = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlhelplistkey)   : g:filelist_hlhelplistkey
+        let l:hlhelplistdes   = filelist#ColorBgtype(l:gbg) == "White" ? filelist#ColorInvert(g:filelist_hlhelplistdes)   : g:filelist_hlhelplistdes
 
         " hl fold and file
-        execute 'hi! FilelistHlSetMark     ctermfg='.filelist#ColorName(l:hlsetmark).'     ctermbg=NONE cterm=NONE guifg='.l:hlsetmark     .' guibg=NONE gui=NONE'
-        execute 'hi! FilelistHlSetIcon     ctermfg='.filelist#ColorName(l:hlseticon).'     ctermbg=NONE cterm=NONE guifg='.l:hlseticon     .' guibg=NONE gui=NONE'
-        execute 'hi! FilelistHlFoldClose   ctermfg='.filelist#ColorName(l:hlfoldclose).'   ctermbg=NONE cterm=NONE guifg='.l:hlfoldclose   .' guibg=NONE gui=NONE'
-        execute 'hi! FilelistHlFoldOpen    ctermfg='.filelist#ColorName(l:hlfoldopen).'    ctermbg=NONE cterm=NONE guifg='.l:hlfoldopen    .' guibg=NONE gui=NONE'
-        execute 'hi! FilelistHlFileDefault ctermfg='.filelist#ColorName(l:hlfiledefault).' ctermbg=NONE cterm=NONE guifg='.l:hlfiledefault .' guibg=NONE gui=NONE'
-        execute 'hi! FilelistHlFileExecute ctermfg='.filelist#ColorName(l:hlfileexecute).' ctermbg=NONE cterm=NONE guifg='.l:hlfileexecute .' guibg=NONE gui=NONE'
-        execute 'hi! FilelistHlFileSymlink ctermfg='.filelist#ColorName(l:hlfilesymlink).' ctermbg=NONE cterm=NONE guifg='.l:hlfilesymlink .' guibg=NONE gui=NONE'
-        execute 'hi! FilelistHlBmlistTitle ctermfg='.filelist#ColorName(l:hlbmlisttitle).' ctermbg=NONE cterm=NONE guifg='.l:hlbmlisttitle .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlSetMark       ctermfg='.filelist#ColorName(l:hlsetmark)      .' ctermbg=NONE cterm=NONE guifg='.l:hlsetmark      .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlSetIcon       ctermfg='.filelist#ColorName(l:hlseticon)      .' ctermbg=NONE cterm=NONE guifg='.l:hlseticon      .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlFoldClose     ctermfg='.filelist#ColorName(l:hlfoldclose)    .' ctermbg=NONE cterm=NONE guifg='.l:hlfoldclose    .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlFoldOpen      ctermfg='.filelist#ColorName(l:hlfoldopen)     .' ctermbg=NONE cterm=NONE guifg='.l:hlfoldopen     .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlFileDefault   ctermfg='.filelist#ColorName(l:hlfiledefault)  .' ctermbg=NONE cterm=NONE guifg='.l:hlfiledefault  .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlFileExecute   ctermfg='.filelist#ColorName(l:hlfileexecute)  .' ctermbg=NONE cterm=NONE guifg='.l:hlfileexecute  .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlFileSymlink   ctermfg='.filelist#ColorName(l:hlfilesymlink)  .' ctermbg=NONE cterm=NONE guifg='.l:hlfilesymlink  .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlBmlistTitle   ctermfg='.filelist#ColorName(l:hlbmlisttitle)  .' ctermbg=NONE cterm=NONE guifg='.l:hlbmlisttitle  .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlHelplistTitle ctermfg='.filelist#ColorName(l:hlhelplisttitle).' ctermbg=NONE cterm=NONE guifg='.l:hlhelplisttitle.' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlHelplistKey   ctermfg='.filelist#ColorName(l:hlhelplistkey)  .' ctermbg=NONE cterm=NONE guifg='.l:hlhelplistkey  .' guibg=NONE gui=NONE'
+        execute 'hi! FilelistHlHelplistDes   ctermfg='.filelist#ColorName(l:hlhelplistdes)  .' ctermbg=NONE cterm=NONE guifg='.l:hlhelplistdes  .' guibg=NONE gui=NONE'
 
         " prompt message
         hi! FilelistPmtDefault ctermfg=Gray   ctermbg=NONE cterm=Bold guifg=#B1B3B8 guibg=NONE gui=Bold
