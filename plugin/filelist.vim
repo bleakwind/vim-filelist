@@ -471,11 +471,21 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                 if !filereadable(l:node.path) && !isdirectory(l:node.path)
                     let l:prompt_bok = "The bookmark not found: ".l:node.path
                     echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                    " restore cursor
+                    if win_id2win(l:orig_winidn) != 0
+                        call win_gotoid(l:orig_winidn)
+                        call setpos('.', l:current_cursor)
+                    endif
                 elseif l:node.type == 'bfold'
                     let g:filelist_mainpath = l:node.path
                     execute 'cd '.fnameescape(l:node.path)
                     call cursor(1, 1)
                     call filelist#RefreshList()
+                    " restore cursor
+                    if win_id2win(l:orig_winidn) != 0
+                        call win_gotoid(l:orig_winidn)
+                        call setpos('.', l:current_cursor)
+                    endif
                 else
                     call filelist#OpenFile(l:node.path)
                 endif
@@ -485,15 +495,15 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                     let l:node.expand = !l:node.expand
                     if l:node.expand | call filelist#FilelistBuild(l:node) | endif
                     call filelist#WinDatalist()
+                    " restore cursor
+                    if win_id2win(l:orig_winidn) != 0
+                        call win_gotoid(l:orig_winidn)
+                        call setpos('.', l:current_cursor)
+                    endif
                 else
                     call filelist#OpenFile(l:node.path)
                 endif
             endif
-        endif
-        " restore cursor
-        if win_id2win(l:orig_winidn) != 0
-            call win_gotoid(l:orig_winidn)
-            call setpos('.', l:current_cursor)
         endif
     endfunction
 
@@ -542,11 +552,21 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                             if !filereadable(l:node.path) && !isdirectory(l:node.path)
                                 "let l:prompt_bok = "The bookmark not found: ".l:node.path
                                 "echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                                "" restore cursor
+                                "if win_id2win(l:orig_winidn) != 0
+                                "    call win_gotoid(l:orig_winidn)
+                                "    call setpos('.', l:current_cursor)
+                                "endif
                             elseif l:node.type == 'bfold'
                                 "let g:filelist_mainpath = l:node.path
                                 "execute 'cd '.fnameescape(l:node.path)
                                 "call cursor(1, 1)
                                 "call filelist#RefreshList()
+                                "" restore cursor
+                                "if win_id2win(l:orig_winidn) != 0
+                                "    call win_gotoid(l:orig_winidn)
+                                "    call setpos('.', l:current_cursor)
+                                "endif
                             else
                                 "call filelist#OpenFile(l:node.path)
                             endif
@@ -554,11 +574,21 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                             if !filereadable(l:node.path) && !isdirectory(l:node.path)
                                 let l:prompt_bok = "The bookmark not found: ".l:node.path
                                 echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                                " restore cursor
+                                if win_id2win(l:orig_winidn) != 0
+                                    call win_gotoid(l:orig_winidn)
+                                    call setpos('.', l:current_cursor)
+                                endif
                             elseif l:node.type == 'bfold'
                                 let g:filelist_mainpath = l:node.path
                                 execute 'cd '.fnameescape(l:node.path)
                                 call cursor(1, 1)
                                 call filelist#RefreshList()
+                                " restore cursor
+                                if win_id2win(l:orig_winidn) != 0
+                                    call win_gotoid(l:orig_winidn)
+                                    call setpos('.', l:current_cursor)
+                                endif
                             else
                                 call filelist#OpenFile(l:node.path)
                             endif
@@ -569,12 +599,22 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                                 let l:node.expand = !l:node.expand
                                 if l:node.expand | call filelist#FilelistBuild(l:node) | endif
                                 call filelist#WinDatalist()
+                                " restore cursor
+                                if win_id2win(l:orig_winidn) != 0
+                                    call win_gotoid(l:orig_winidn)
+                                    call setpos('.', l:current_cursor)
+                                endif
                             endif
                         elseif l:type == 1
                             if l:node.type == 'fold'
                                 "let l:node.expand = !l:node.expand
                                 "if l:node.expand | call filelist#FilelistBuild(l:node) | endif
                                 "call filelist#WinDatalist()
+                                "" restore cursor
+                                "if win_id2win(l:orig_winidn) != 0
+                                "    call win_gotoid(l:orig_winidn)
+                                "    call setpos('.', l:current_cursor)
+                                "endif
                             else
                                 "call filelist#OpenFile(l:node.path)
                             endif
@@ -583,6 +623,11 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                                 let l:node.expand = !l:node.expand
                                 if l:node.expand | call filelist#FilelistBuild(l:node) | endif
                                 call filelist#WinDatalist()
+                                " restore cursor
+                                if win_id2win(l:orig_winidn) != 0
+                                    call win_gotoid(l:orig_winidn)
+                                    call setpos('.', l:current_cursor)
+                                endif
                             else
                                 call filelist#OpenFile(l:node.path)
                             endif
@@ -591,11 +636,6 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
 
                 endif
             endif
-        endif
-        " restore cursor
-        if win_id2win(l:orig_winidn) != 0
-            call win_gotoid(l:orig_winidn)
-            call setpos('.', l:current_cursor)
         endif
     endfunction
 
