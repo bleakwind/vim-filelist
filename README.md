@@ -87,21 +87,21 @@ let g:filelist_hlhelplistdes = '#A1ACA3'
 ## Key Mappings
 
 ### When the filelist is focused:
-| Key           | Action                                   |
-| ------------- | ---------------------------------------- |
-| `o/<CR>`      | Open file/directory or toggle expansion  |
-| `SingleClick` | Selects file/directory highlights it     |
-| `DoubleClick` | Open file/directory or toggle expansion  |
-| `MarkClick`   | Open file/directory or toggle expansion  |
-| `C`           | Set current directory as main path       |
-| `U`           | Move up one directory level              |
-| `R`           | Refresh the file list                    |
-| `E`           | Open in external program                 |
-| `.`           | Toggle display hidden files              |
-| `B`           | Toggle display bookmark                  |
-| `mi`          | Add current file/directory to bookmarks  |
-| `md`          | Delete from bookmark                     |
-| `?`           | Switch to help message                   |
+| Key           | Action                                      |
+| ------------- | ------------------------------------------- |
+| `o/<CR>`      | Open file/folder or toggle folder expansion |
+| `SingleClick` | Selects file/folder and highlights it       |
+| `DoubleClick` | Open file/folder or toggle folder expansion |
+| `MarkClick`   | Expand or collapse folders                  |
+| `C`           | Set current folder as main path             |
+| `U`           | Move up one folder level                    |
+| `R`           | Refresh the file list                       |
+| `E`           | Open in external program                    |
+| `.`           | Toggle display hidden file/folder           |
+| `B`           | Toggle display bookmark                     |
+| `mi`          | Add current file/folder to bookmarks        |
+| `md`          | Delete selected file/folder from bookmark   |
+| `?`           | Toggle display help message                 |
 
 ## License
 BSD 2-Clause - See LICENSE file
