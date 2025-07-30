@@ -351,17 +351,18 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " filelist#GetNode
     " --------------------------------------------------
     function! filelist#GetNode(...) abort
-        " get message
+        " init message
         let l:node_line = getline('.')
-        let l:offset_line = 0
+        let l:offset_line = 1
+
+        " offset help
+        if exists('s:filelist_helpstate') && s:filelist_helpstate
+            let l:offset_line += len(s:filelist_helpdata) + 2
+        endif
 
         " handle bookmark
         if exists('s:filelist_bmstate') && s:filelist_bmstate
-            if exists('s:filelist_helpstate') && s:filelist_helpstate
-                let l:offset_line += len(s:filelist_helpdata) + 2
-            endif
-            let l:process_line = l:offset_line + 1
-
+            let l:process_line = l:offset_line
             let l:bmdata = filelist#BookmarkLoad()
             if !empty(l:bmdata)
                 let l:current_line = line('.')
@@ -373,14 +374,15 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             endif
         endif
 
-        " handle filelist
-        let l:found_fldata = 0
+        " offset bookmark
         if exists('s:filelist_bmstate') && s:filelist_bmstate
             let l:offset_line += len(l:bmdata) + 2
         endif
-        let l:process_line = l:offset_line + 1
 
+        " handle filelist
+        let l:process_line = l:offset_line
         let l:fldata = s:filelist_fldata
+        let l:found_fldata = 0
         while 1
             " if found
             if l:process_line == line('.')
@@ -890,18 +892,21 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " filelist#LocateLine
     " --------------------------------------------------
     function! filelist#LocateLine(node) abort
-        let l:offset = 0
+        " init message
+        let l:offset_line = 1
+
+        " offset help
         if exists('s:filelist_helpstate') && s:filelist_helpstate
-            let l:offset += len(s:filelist_helpdata) + 2
+            let l:offset_line += len(s:filelist_helpdata) + 2
         endif
+        " offset bookmark
         if exists('s:filelist_bmstate') && s:filelist_bmstate
-            let l:offset += len(s:filelist_bmdata) + 2
+            let l:offset_line += len(s:filelist_bmdata) + 2
         endif
 
+        " handle filelist
+        let l:process_line = l:offset_line
         let l:fldata = s:filelist_fldata
-        let l:current_line = 1 + l:offset
-
-        " loop list
         while 1
             " if found
             if l:fldata == a:node
@@ -910,7 +915,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             " sub node
             if l:fldata.expand && has_key(l:fldata, 'children') && !empty(l:fldata.children)
                 let l:fldata = l:fldata.children[0]
-                let l:current_line += 1
+                let l:process_line += 1
             " node list
             else
                 while has_key(l:fldata, 'parent')
@@ -918,7 +923,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                     let l:idx = index(l:par.children, l:fldata)
                     if l:idx < len(l:par.children) - 1
                         let l:fldata = l:par.children[l:idx + 1]
-                        let l:current_line += 1
+                        let l:process_line += 1
                         break
                     else
                         let l:fldata = l:par
@@ -929,7 +934,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                 endif
             endif
         endwhile
-        return l:current_line
+        return l:process_line
     endfunction
 
     " --------------------------------------------------
