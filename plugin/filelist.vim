@@ -673,12 +673,12 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             call filelist#WinDatalist()
 
             " restore cursor
+            execute "normal! ".(l:current_topline + &scrolloff)."zt"
             if l:current_line <= line('$')
                 call cursor(l:current_line, l:current_col)
             else
                 call cursor(line('$'), l:current_col)
             endif
-            execute "normal! ".l:current_topline."zt"
 
             " set highlight
             call win_execute(s:filelist_winidn, 'call filelist#SetHlcolor()')
