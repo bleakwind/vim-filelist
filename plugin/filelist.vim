@@ -43,9 +43,9 @@ let g:filelist_hlfiledefault        = get(g:, 'filelist_hlfiledefault',       '#
 let g:filelist_hlfileexecute        = get(g:, 'filelist_hlfileexecute',       '#EEBE77')
 let g:filelist_hlfilesymlink        = get(g:, 'filelist_hlfilesymlink',       '#95D475')
 let g:filelist_hlbmlisttitle        = get(g:, 'filelist_hlbmlisttitle',       '#92BDE8')
-let g:filelist_hlhelplisttitle      = get(g:, 'filelist_hlhelplisttitle',     '#95D475')
+let g:filelist_hlhelplisttitle      = get(g:, 'filelist_hlhelplisttitle',     '#92BDE8')
 let g:filelist_hlhelplistkey        = get(g:, 'filelist_hlhelplistkey',       '#EEBE77')
-let g:filelist_hlhelplistdes        = get(g:, 'filelist_hlhelplistdes',       '#92BDE8')
+let g:filelist_hlhelplistdes        = get(g:, 'filelist_hlhelplistdes',       '#A1ACA3')
 
 " file mark
 let g:filelist_mark                 = get(g:, 'filelist_mark', {})

@@ -68,6 +68,12 @@ let g:filelist_hlfileexecute = '#EEBE77'
 let g:filelist_hlfilesymlink = '#95D475'
 " Sets highlight color for bookmark list title
 let g:filelist_hlbmlisttitle = '#92BDE8'
+" Sets highlight color for help list title
+let g:filelist_hlhelplisttitle = '#92BDE8'
+" Sets highlight color for help list key
+let g:filelist_hlhelplistkey = '#EEBE77'
+" Sets highlight color for help list description
+let g:filelist_hlhelplistdes = '#A1ACA3'
 ```
 
 ## Usage
