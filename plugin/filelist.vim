@@ -106,19 +106,32 @@ let s:filelist_bmfile               = g:filelist_bmpath.'/bookmark'
 let s:filelist_bmdata               = {}
 let s:filelist_helpstate            = 0
 let s:filelist_helpdata             = get(s:, 'filelist_helpdata', [
-            \ { 'key': 'o/<CR>', 'des': 'Open file/directory or toggle expansion' },
-            \ { 'key': 'sg-clk', 'des': 'Mouse Single Click: Selects file/directory (highlights it) ' },
-            \ { 'key': 'db-clk', 'des': 'Mouse Double Click: Open file/directory or toggle expansion' },
-            \ { 'key': 'mk-clk', 'des': 'Marker Mouse Click: Open file/directory or toggle expansion' },
-            \ { 'key': 'C     ', 'des': 'Set current directory as main path' },
-            \ { 'key': 'U     ', 'des': 'Move up one directory level' },
-            \ { 'key': 'R     ', 'des': 'Refresh the file list' },
-            \ { 'key': 'E     ', 'des': 'Open in external program' },
-            \ { 'key': '.     ', 'des': 'Toggle display hidden files' },
-            \ { 'key': 'B     ', 'des': 'Toggle display bookmark' },
-            \ { 'key': 'mi    ', 'des': 'Add current file/directory to bookmarks' },
-            \ { 'key': 'md    ', 'des': 'Delete from bookmark' },
-            \ { 'key': '?     ', 'des': 'Switch to help message' },
+            \ { 'key': 'o/<CR>     ', 'des': '' },
+            \ { 'key': '',            'des': 'Open file/directory or toggle expansion' },
+            \ { 'key': 'SingleClick', 'des': '' },
+            \ { 'key': '',            'des': 'Selects file/directory highlights it' },
+            \ { 'key': 'DoubleClick', 'des': '' },
+            \ { 'key': '',            'des': 'Open file/directory or toggle expansion' },
+            \ { 'key': 'MarkClick  ', 'des': '' },
+            \ { 'key': '',            'des': 'Open file/directory or toggle expansion' },
+            \ { 'key': 'C          ', 'des': '' },
+            \ { 'key': '',            'des': 'Set current directory as main path' },
+            \ { 'key': 'U          ', 'des': '' },
+            \ { 'key': '',            'des': 'Move up one directory level' },
+            \ { 'key': 'R          ', 'des': '' },
+            \ { 'key': '',            'des': 'Refresh the file list' },
+            \ { 'key': 'E          ', 'des': '' },
+            \ { 'key': '',            'des': 'Open in external program' },
+            \ { 'key': '.          ', 'des': '' },
+            \ { 'key': '',            'des': 'Toggle display hidden files' },
+            \ { 'key': 'B          ', 'des': '' },
+            \ { 'key': '',            'des': 'Toggle display bookmark' },
+            \ { 'key': 'mi         ', 'des': '' },
+            \ { 'key': '',            'des': 'Add current file/directory to bookmarks' },
+            \ { 'key': 'md         ', 'des': '' },
+            \ { 'key': '',            'des': 'Delete from bookmark' },
+            \ { 'key': '?          ', 'des': '' },
+            \ { 'key': '',            'des': 'Switch to help message' },
             \ ])
 
 " ============================================================================
@@ -1367,7 +1380,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             let l:prefix = repeat('  ', 1)
             let l:key = item.key
             let l:cont = item.des
-            let l:data_line = l:prefix.l:key.' '.l:cont
+            let l:data_line = l:prefix.l:key.''.l:cont
             call add(a:lines, l:data_line)
 
             " hl data
@@ -1378,7 +1391,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             let l:key_id = matchaddpos('FilelistHlHelplistKey', [[l:line_num, l:key_col, l:key_width]])
             call add(w:filelist_highlight, l:key_id)
 
-            let l:cont_col = len(l:prefix) + strlen(l:key) + 1 + 1
+            let l:cont_col = len(l:prefix) + strlen(l:key) + 1
             let l:cont_width = strlen(l:cont)
             let l:cont_id = matchaddpos('FilelistHlHelplistDes', [[l:line_num, l:cont_col, l:cont_width]])
             call add(w:filelist_highlight, l:cont_id)
