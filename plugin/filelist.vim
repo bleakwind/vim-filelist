@@ -61,12 +61,12 @@ let g:filelist_attr.file_default    = get(g:filelist_attr, 'file_default',    nr
 let g:filelist_attr.file_execute    = get(g:filelist_attr, 'file_execute',    nr2char(0x1F4D9))
 let g:filelist_attr.file_symlink    = get(g:filelist_attr, 'file_symlink',    nr2char(0x1F517))
 let g:filelist_attr.bmlist_title    = get(g:filelist_attr, 'bmlist_title',    nr2char(0x1F516))
-let g:filelist_attr.helplist_title  = get(g:filelist_attr, 'helplist_title',  nr2char(0x2753))
+let g:filelist_attr.helplist_title  = get(g:filelist_attr, 'helplist_title',  nr2char(0x2754))
 
 " file type
 let g:filelist_type                 = get(g:, 'filelist_type', {})
 let g:filelist_type.type_mp3        = get(g:filelist_type, 'type_mp3',        { 'icon': nr2char(0x1F3B5), 'ext': ['mp3'] })
-let g:filelist_type.type_mp4        = get(g:filelist_type, 'type_mp4',        { 'icon': nr2char(0x1F39E), 'ext': ['mp4'] })
+let g:filelist_type.type_mp4        = get(g:filelist_type, 'type_mp4',        { 'icon': nr2char(0x1F3AC), 'ext': ['mp4'] })
 let g:filelist_type.type_php        = get(g:filelist_type, 'type_php',        { 'icon': nr2char(0x1F418), 'ext': ['php'] })
 let g:filelist_type.type_java       = get(g:filelist_type, 'type_java',       { 'icon': nr2char(0x2615),  'ext': ['java'] })
 let g:filelist_type.type_python     = get(g:filelist_type, 'type_python',     { 'icon': nr2char(0x1F40D), 'ext': ['py'] })
