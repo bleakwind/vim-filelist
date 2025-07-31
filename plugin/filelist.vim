@@ -857,7 +857,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                         if l:fldata.type == 'fold' && !l:fldata.expand
                             let l:fldata.expand = 1
                             call filelist#FilelistBuild(l:fldata)
-                            call filelist#RefreshList()
+                            call filelist#WinDatalist()
                         endif
                         " find subnode
                         let l:found_fldata = 0
