@@ -688,9 +688,15 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     function! filelist#SetNodepath(...) abort
         let l:node = filelist#GetNode()
         if !empty(l:node) && l:node.type == 'fold'
+            " set mainpath
             let g:filelist_mainpath = l:node.path
             execute 'cd '.fnameescape(l:node.path)
+
+            " refresh filelist
             call filelist#RefreshList()
+
+            " move top
+            call cursor(1, 1)
         endif
     endfunction
 
