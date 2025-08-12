@@ -157,9 +157,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#WinDatalist(...) abort
         if s:filelist_winidn != -1 && win_id2win(s:filelist_winidn) != 0
-            " save cursor position
-            let l:current_cursor = getpos('.')
-            let l:current_line = line('.')
+            " save env
+            let l:orig_cursor = getpos('.')
 
             " clean highlight
             if exists('w:filelist_highlight')
@@ -199,14 +198,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             " set highlight
             call win_execute(s:filelist_winidn, 'call filelist#SetHlcolor()')
 
-            " restore cursor position
-            if l:current_line > 0 && l:current_line <= line('$')
-                call cursor(l:current_line, l:current_cursor[2])
-            elseif l:current_line <= 0
-                call cursor(1, l:current_cursor[2])
-            else
-                call cursor(line('$'), l:current_cursor[2])
-            endif
+            " restore env
+            let l:safe_line = max([1, min([l:orig_cursor[1], line('$')])])
+            let l:safe_colm = max([1, min([l:orig_cursor[2], col([l:safe_line, '$'])])])
+            keepjumps call setpos('.', [l:orig_cursor[0], l:safe_line, l:safe_colm, l:orig_cursor[3]])
         endif
     endfunction
 
@@ -365,7 +360,6 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#GetNode(...) abort
         " init message
-        let l:node_line = getline('.')
         let l:offset_line = 1
 
         " offset help
@@ -378,10 +372,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             let l:process_line = l:offset_line
             let l:bmdata = filelist#BookmarkLoad()
             if !empty(l:bmdata)
-                let l:current_line = line('.')
-                if l:current_line > l:process_line && l:current_line <= (l:process_line + len(l:bmdata))
-                    return l:bmdata[l:current_line - l:process_line - 1]
-                elseif l:current_line <= l:process_line || l:current_line == (l:process_line + len(l:bmdata) + 1)
+                let l:curr_line = line('.')
+                if l:curr_line > l:process_line && l:curr_line <= (l:process_line + len(l:bmdata))
+                    return l:bmdata[l:curr_line - l:process_line - 1]
+                elseif l:curr_line <= l:process_line || l:curr_line == (l:process_line + len(l:bmdata) + 1)
                     return {}
                 endif
             endif
@@ -473,9 +467,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " filelist#OpenNode
     " --------------------------------------------------
     function! filelist#OpenNode(...) abort
-        " save cursor
+        " save env
+        let l:orig_cursor = getpos('.')
         let l:orig_winidn = win_getid()
-        let l:current_cursor = getpos('.')
 
         " operate node
         let l:node = filelist#GetNode()
@@ -486,19 +480,19 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                 if !filereadable(l:node.path) && !isdirectory(l:node.path)
                     let l:prompt_bok = "The bookmark not found: ".l:node.path
                     echohl FilelistPmtError | echo l:prompt_bok | echohl None
-                    " restore cursor
+                    " restore env
                     if win_id2win(l:orig_winidn) != 0
                         call win_gotoid(l:orig_winidn)
-                        call setpos('.', l:current_cursor)
+                        call setpos('.', l:orig_cursor)
                     endif
                 elseif l:node.type == 'bfold'
                     let g:filelist_mainpath = l:node.path
                     execute 'cd '.fnameescape(l:node.path)
                     call filelist#RefreshList()
-                    " restore cursor
+                    " restore env
                     if win_id2win(l:orig_winidn) != 0
                         call win_gotoid(l:orig_winidn)
-                        call setpos('.', l:current_cursor)
+                        call setpos('.', l:orig_cursor)
                     endif
                 else
                     call filelist#OpenFile(l:node.path)
@@ -509,10 +503,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                     let l:node.expand = !l:node.expand
                     if l:node.expand | call filelist#FilelistBuild(l:node) | endif
                     call filelist#RefreshList()
-                    " restore cursor
+                    " restore env
                     if win_id2win(l:orig_winidn) != 0
                         call win_gotoid(l:orig_winidn)
-                        call setpos('.', l:current_cursor)
+                        call setpos('.', l:orig_cursor)
                     endif
                 else
                     call filelist#OpenFile(l:node.path)
@@ -525,17 +519,17 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " filelist#MouseNode
     " --------------------------------------------------
     function! filelist#MouseNode(...) abort
-        " save cursor
+        " save env
+        let l:orig_cursor = getpos('.')
         let l:orig_winidn = win_getid()
-        let l:current_cursor = getpos('.')
 
         " check mouse
         let l:oper = (a:0 > 0 && a:1 == 1) ? 1 : 2
-        let l:current_time = reltimefloat(reltime())
-        if l:oper == 1 && (l:current_time - s:filelist_msetimer) < 0.3
+        let l:curr_time = reltimefloat(reltime())
+        if l:oper == 1 && (l:curr_time - s:filelist_msetimer) < 0.3
             let s:filelist_msetimer = 0
         else
-            let s:filelist_msetimer = l:current_time
+            let s:filelist_msetimer = l:curr_time
 
             " check pos
             let l:mouse_pos = getmousepos()
@@ -566,19 +560,19 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                             if !filereadable(l:node.path) && !isdirectory(l:node.path)
                                 "let l:prompt_bok = "The bookmark not found: ".l:node.path
                                 "echohl FilelistPmtError | echo l:prompt_bok | echohl None
-                                "" restore cursor
+                                "" restore env
                                 "if win_id2win(l:orig_winidn) != 0
                                 "    call win_gotoid(l:orig_winidn)
-                                "    call setpos('.', l:current_cursor)
+                                "    call setpos('.', l:orig_cursor)
                                 "endif
                             elseif l:node.type == 'bfold'
                                 "let g:filelist_mainpath = l:node.path
                                 "execute 'cd '.fnameescape(l:node.path)
                                 "call filelist#RefreshList()
-                                "" restore cursor
+                                "" restore env
                                 "if win_id2win(l:orig_winidn) != 0
                                 "    call win_gotoid(l:orig_winidn)
-                                "    call setpos('.', l:current_cursor)
+                                "    call setpos('.', l:orig_cursor)
                                 "endif
                             else
                                 "call filelist#OpenFile(l:node.path)
@@ -587,19 +581,19 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                             if !filereadable(l:node.path) && !isdirectory(l:node.path)
                                 let l:prompt_bok = "The bookmark not found: ".l:node.path
                                 echohl FilelistPmtError | echo l:prompt_bok | echohl None
-                                " restore cursor
+                                " restore env
                                 if win_id2win(l:orig_winidn) != 0
                                     call win_gotoid(l:orig_winidn)
-                                    call setpos('.', l:current_cursor)
+                                    call setpos('.', l:orig_cursor)
                                 endif
                             elseif l:node.type == 'bfold'
                                 let g:filelist_mainpath = l:node.path
                                 execute 'cd '.fnameescape(l:node.path)
                                 call filelist#RefreshList()
-                                " restore cursor
+                                " restore env
                                 if win_id2win(l:orig_winidn) != 0
                                     call win_gotoid(l:orig_winidn)
-                                    call setpos('.', l:current_cursor)
+                                    call setpos('.', l:orig_cursor)
                                 endif
                             else
                                 call filelist#OpenFile(l:node.path)
@@ -611,10 +605,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                                 let l:node.expand = !l:node.expand
                                 if l:node.expand | call filelist#FilelistBuild(l:node) | endif
                                 call filelist#RefreshList()
-                                " restore cursor
+                                " restore env
                                 if win_id2win(l:orig_winidn) != 0
                                     call win_gotoid(l:orig_winidn)
-                                    call setpos('.', l:current_cursor)
+                                    call setpos('.', l:orig_cursor)
                                 endif
                             endif
                         elseif l:oper == 1
@@ -622,10 +616,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                                 "let l:node.expand = !l:node.expand
                                 "if l:node.expand | call filelist#FilelistBuild(l:node) | endif
                                 "call filelist#RefreshList()
-                                "" restore cursor
+                                "" restore env
                                 "if win_id2win(l:orig_winidn) != 0
                                 "    call win_gotoid(l:orig_winidn)
-                                "    call setpos('.', l:current_cursor)
+                                "    call setpos('.', l:orig_cursor)
                                 "endif
                             else
                                 "call filelist#OpenFile(l:node.path)
@@ -635,10 +629,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                                 let l:node.expand = !l:node.expand
                                 if l:node.expand | call filelist#FilelistBuild(l:node) | endif
                                 call filelist#RefreshList()
-                                " restore cursor
+                                " restore env
                                 if win_id2win(l:orig_winidn) != 0
                                     call win_gotoid(l:orig_winidn)
-                                    call setpos('.', l:current_cursor)
+                                    call setpos('.', l:orig_cursor)
                                 endif
                             else
                                 call filelist#OpenFile(l:node.path)
@@ -656,10 +650,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#RefreshList(...) abort
         if exists('s:filelist_fldata')
-            " save line
-            let l:current_line = line('.')
-            let l:current_col = col('.')
-            let l:current_topline = line('w0')
+            " save env
+            let l:orig_cursor = getpos('.')
+            let l:orig_topline = line('w0')
 
             " save state
             let l:expand_path = filelist#GetPath(s:filelist_fldata)
@@ -669,16 +662,15 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
             call filelist#RestorePath(s:filelist_fldata, l:expand_path)
             call filelist#WinDatalist()
 
-            " restore cursor
-            execute "normal! ".(l:current_topline + &scrolloff)."zt"
-            if l:current_line <= line('$')
-                call cursor(l:current_line, l:current_col)
-            else
-                call cursor(line('$'), l:current_col)
-            endif
+            execute "normal! ".(l:orig_topline + &scrolloff)."zt"
 
             " set highlight
             call win_execute(s:filelist_winidn, 'call filelist#SetHlcolor()')
+
+            " restore env
+            let l:safe_line = max([1, min([l:orig_cursor[1], line('$')])])
+            let l:safe_colm = max([1, min([l:orig_cursor[2], col([l:safe_line, '$'])])])
+            keepjumps call setpos('.', [l:orig_cursor[0], l:safe_line, l:safe_colm, l:orig_cursor[3]])
         endif
     endfunction
 
@@ -826,8 +818,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
         if !filelist#IsSpecial(bufnr('%'))
 
             " get filepath
-            let l:current_file = expand('%:p')
-            if !empty(l:current_file)
+            let l:curr_file = expand('%:p')
+            if !empty(l:curr_file)
 
                 " check win
                 if s:filelist_winidn == -1 || win_id2win(s:filelist_winidn) == 0
@@ -835,14 +827,14 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                 endif
 
                 " check filepath
-                let l:relative_path = substitute(l:current_file, '^'.g:filelist_mainpath.'/', '', '')
+                let l:relative_path = substitute(l:curr_file, '^'.g:filelist_mainpath.'/', '', '')
 
                 " not in mainpath
-                if l:relative_path ==# l:current_file
-                    let l:parent_dir = fnamemodify(l:current_file, ':h')
+                if l:relative_path ==# l:curr_file
+                    let l:parent_dir = fnamemodify(l:curr_file, ':h')
                     let g:filelist_mainpath = l:parent_dir
                     execute 'cd '.fnameescape(l:parent_dir)
-                    let l:relative_path = fnamemodify(l:current_file, ':t')
+                    let l:relative_path = fnamemodify(l:curr_file, ':t')
                 endif
 
                 " check filepath
@@ -870,8 +862,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                         for child in l:fldata.children
                             if child.name ==# il
                                 let l:fldata = child
-                                let l:current_line = filelist#LocateLine(child)
-                                call cursor(l:current_line, 1)
+                                let l:curr_line = filelist#LocateLine(child)
+                                call cursor(l:curr_line, 1)
                                 normal! zz
                                 let l:found_fldata = 1
                                 break
@@ -884,7 +876,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
                     endfor
 
                     " move cursor
-                    if l:fldata.path ==# l:current_file
+                    if l:fldata.path ==# l:curr_file
                         let l:data_line = getline('.')
                         let l:name_start = matchend(l:data_line, '^\s*.\s.\s') + 1
                         call cursor(line('.'), l:name_start)
@@ -1297,21 +1289,15 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#BookmarkOpen() abort
         if !exists('s:filelist_bmstate') || !s:filelist_bmstate
-            " save cursor position
-            let l:current_cursor = getpos('.')
-            let l:current_line = line('.')
+            " save env
+            let l:orig_cursor = getpos('.')
             " open bookmark
             let s:filelist_bmstate = 1
             call filelist#RefreshList()
-            " restore cursor position
-            let l:current_line = l:current_line + len(s:filelist_bmdata) + 2
-            if l:current_line > 0 && l:current_line <= line('$')
-                call cursor(l:current_line, l:current_cursor[2])
-            elseif l:current_line <= 0
-                call cursor(1, l:current_cursor[2])
-            else
-                call cursor(line('$'), l:current_cursor[2])
-            endif
+            " restore env
+            let l:safe_line = max([1, min([l:orig_cursor[1], line('$')])])
+            let l:safe_colm = max([1, min([l:orig_cursor[2], col([l:safe_line, '$'])])])
+            keepjumps call setpos('.', [l:orig_cursor[0], l:safe_line, l:safe_colm, l:orig_cursor[3]])
         endif
     endfunction
 
@@ -1320,21 +1306,15 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#BookmarkClose() abort
         if exists('s:filelist_bmstate') && s:filelist_bmstate
-            " save cursor position
-            let l:current_cursor = getpos('.')
-            let l:current_line = line('.')
+            " save env
+            let l:orig_cursor = getpos('.')
             " open bookmark
             let s:filelist_bmstate = 0
             call filelist#RefreshList()
-            " restore cursor position
-            let l:current_line = l:current_line - len(s:filelist_bmdata) - 2
-            if l:current_line > 0 && l:current_line <= line('$')
-                call cursor(l:current_line, l:current_cursor[2])
-            elseif l:current_line <= 0
-                call cursor(1, l:current_cursor[2])
-            else
-                call cursor(line('$'), l:current_cursor[2])
-            endif
+            " restore env
+            let l:safe_line = max([1, min([l:orig_cursor[1], line('$')])])
+            let l:safe_colm = max([1, min([l:orig_cursor[2], col([l:safe_line, '$'])])])
+            keepjumps call setpos('.', [l:orig_cursor[0], l:safe_line, l:safe_colm, l:orig_cursor[3]])
         endif
     endfunction
 
@@ -1414,21 +1394,15 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#HelpOpen() abort
         if !exists('s:filelist_helpstate') || !s:filelist_helpstate
-            " save cursor position
-            let l:current_cursor = getpos('.')
-            let l:current_line = line('.')
+            " save env
+            let l:orig_cursor = getpos('.')
             " open help
             let s:filelist_helpstate = 1
             call filelist#RefreshList()
-            " restore cursor position
-            let l:current_line = l:current_line + len(s:filelist_helpdata) + 2
-            if l:current_line > 0 && l:current_line <= line('$')
-                call cursor(l:current_line, l:current_cursor[2])
-            elseif l:current_line <= 0
-                call cursor(1, l:current_cursor[2])
-            else
-                call cursor(line('$'), l:current_cursor[2])
-            endif
+            " restore env
+            let l:safe_line = max([1, min([l:orig_cursor[1], line('$')])])
+            let l:safe_colm = max([1, min([l:orig_cursor[2], col([l:safe_line, '$'])])])
+            keepjumps call setpos('.', [l:orig_cursor[0], l:safe_line, l:safe_colm, l:orig_cursor[3]])
         endif
     endfunction
 
@@ -1437,21 +1411,15 @@ if exists('g:filelist_enabled') && g:filelist_enabled == 1
     " --------------------------------------------------
     function! filelist#HelpClose() abort
         if exists('s:filelist_helpstate') && s:filelist_helpstate
-            " save cursor position
-            let l:current_cursor = getpos('.')
-            let l:current_line = line('.')
+            " save env
+            let l:orig_cursor = getpos('.')
             " open help
             let s:filelist_helpstate = 0
             call filelist#RefreshList()
-            " restore cursor position
-            let l:current_line = l:current_line - len(s:filelist_helpdata) - 2
-            if l:current_line > 0 && l:current_line <= line('$')
-                call cursor(l:current_line, l:current_cursor[2])
-            elseif l:current_line <= 0
-                call cursor(1, l:current_cursor[2])
-            else
-                call cursor(line('$'), l:current_cursor[2])
-            endif
+            " restore env
+            let l:safe_line = max([1, min([l:orig_cursor[1], line('$')])])
+            let l:safe_colm = max([1, min([l:orig_cursor[2], col([l:safe_line, '$'])])])
+            keepjumps call setpos('.', [l:orig_cursor[0], l:safe_line, l:safe_colm, l:orig_cursor[3]])
         endif
     endfunction
 
