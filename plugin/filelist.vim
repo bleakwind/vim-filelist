@@ -32,7 +32,7 @@ let g:filelist_position             = get(g:, 'filelist_position',            'l
 let g:filelist_winwidth             = get(g:, 'filelist_winwidth',            30)
 let g:filelist_mainpath             = get(g:, 'filelist_mainpath',            getcwd())
 let g:filelist_showhide             = get(g:, 'filelist_showhide',            0)
-let g:filelist_bmpath               = get(g:, 'filelist_bmpath',              $HOME.'/.vim/filelist')
+let g:filelist_datapath             = get(g:, 'filelist_datapath',            $HOME.'/.vim/filelist')
 
 " fold and file color
 let g:filelist_hlsetmark            = get(g:, 'filelist_hlsetmark',           '#A1ACA3')
@@ -102,7 +102,7 @@ let s:filelist_winidn               = -1
 let s:filelist_msetimer             = 0
 let s:filelist_fldata               = {}
 let s:filelist_bmstate              = 0
-let s:filelist_bmfile               = g:filelist_bmpath.'/bookmark'
+let s:filelist_bmfile               = g:filelist_datapath.'/bookmark'
 let s:filelist_bmdata               = {}
 let s:filelist_helpstate            = 0
 let s:filelist_helpdata             = get(s:, 'filelist_helpdata', [
@@ -1159,8 +1159,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         let s:filelist_bmdata = []
 
         " check dir
-        if !isdirectory(g:filelist_bmpath)
-            call mkdir(g:filelist_bmpath, 'p', 0777)
+        if !isdirectory(g:filelist_datapath)
+            call mkdir(g:filelist_datapath, 'p', 0777)
         endif
 
         " check file

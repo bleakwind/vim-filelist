@@ -47,7 +47,7 @@ let g:filelist_mainpath = getcwd()
 " Set 1 Show hidden files (default: 0)
 let g:filelist_showhide = 0
 " Set Bookmark place (default: $HOME.'/.vim/filelist')
-let g:filelist_bmpath = $HOME.'/.vim/filelist'
+let g:filelist_datapath = $HOME.'/.vim/filelist'
 ```
 
 Color Customization
