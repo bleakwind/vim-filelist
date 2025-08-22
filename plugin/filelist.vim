@@ -1158,9 +1158,12 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     function! filelist#BookmarkLoad() abort
         let s:filelist_bmdata = []
 
-        " check dir
+        " check dir and file
         if !isdirectory(g:filelist_datapath)
             call mkdir(g:filelist_datapath, 'p', 0777)
+        endif
+        if !filereadable(s:filelist_bmfile)
+            call writefile([], s:filelist_bmfile)
         endif
 
         " check file
@@ -1199,6 +1202,14 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     " filelist#BookmarkInsert
     " --------------------------------------------------
     function! filelist#BookmarkInsert(...) abort
+        " check dir and file
+        if !isdirectory(g:filelist_datapath)
+            call mkdir(g:filelist_datapath, 'p', 0777)
+        endif
+        if !filereadable(s:filelist_bmfile)
+            call writefile([], s:filelist_bmfile)
+        endif
+
         " get path
         let l:path = ''
         if a:0 > 0
