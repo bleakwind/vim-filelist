@@ -479,7 +479,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             if has_key(l:node, 'type') && (l:node.type ==# 'bfold' || l:node.type ==# 'bfile')
                 if !filereadable(l:node.path) && !isdirectory(l:node.path)
                     let l:prompt_bok = "The bookmark not found: ".l:node.path
-                    echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                    echohl FilelistPmtErr | echo l:prompt_bok | echohl None
                     " restore env
                     if win_id2win(l:orig_winidn) != 0
                         call win_gotoid(l:orig_winidn)
@@ -559,7 +559,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         if l:oper ==# 1
                             if !filereadable(l:node.path) && !isdirectory(l:node.path)
                                 "let l:prompt_bok = "The bookmark not found: ".l:node.path
-                                "echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                                "echohl FilelistPmtErr | echo l:prompt_bok | echohl None
                                 "" restore env
                                 "if win_id2win(l:orig_winidn) != 0
                                 "    call win_gotoid(l:orig_winidn)
@@ -580,7 +580,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         elseif l:oper ==# 2
                             if !filereadable(l:node.path) && !isdirectory(l:node.path)
                                 let l:prompt_bok = "The bookmark not found: ".l:node.path
-                                echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                                echohl FilelistPmtErr | echo l:prompt_bok | echohl None
                                 " restore env
                                 if win_id2win(l:orig_winidn) != 0
                                     call win_gotoid(l:orig_winidn)
@@ -732,7 +732,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             if has_key(l:node, 'type') && (l:node.type ==# 'bfold' || l:node.type ==# 'bfile')
                 if !filereadable(l:node.path) && !isdirectory(l:node.path)
                     let l:prompt_bok = "The bookmark not found: ".l:node.path
-                    echohl FilelistPmtError | echo l:prompt_bok | echohl None
+                    echohl FilelistPmtErr | echo l:prompt_bok | echohl None
                 elseif l:node.type ==# 'bfold'
                     if has('unix')
                         silent execute '!xdg-open "' . l:node.path . '"'
@@ -1222,7 +1222,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         endif
         if empty(l:path)
             let l:prompt_bok = "No valid path specified"
-            echohl FilelistPmtError | echo l:prompt_bok | echohl None
+            echohl FilelistPmtErr | echo l:prompt_bok | echohl None
             return
         endif
 
@@ -1231,11 +1231,11 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         let l:prompt_fmt = "The name is incorrect. Please try again. (Press Ctrl+C to exit): "
         let l:name_def = fnamemodify(l:path, ':t')
 
-        echohl FilelistPmtNormal | echo l:prompt_def | echohl None
+        echohl FilelistPmtNor | echo l:prompt_def | echohl None
         let l:name_ipt = input('> ', l:name_def)
 
         while empty(l:name_ipt)
-            echohl FilelistPmtWarning | echo l:prompt_fmt | echohl None
+            echohl FilelistPmtWar | echo l:prompt_fmt | echohl None
             let l:name_ipt = input('> ', l:name_def)
         endwhile
 
@@ -1245,7 +1245,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             for il in s:filelist_bmdata
                 if il.path ==# l:path
                     let l:prompt_ext = "\nThis bookmark already exists: ".l:name_ipt." -> ".l:path
-                    echohl FilelistPmtError | echo l:prompt_ext | echohl None
+                    echohl FilelistPmtErr | echo l:prompt_ext | echohl None
                     return
                 endif
             endfor
@@ -1258,7 +1258,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         \ })
             call filelist#BookmarkSave()
             let l:prompt_suc = "\nThe bookmark added success: ".l:name_ipt." -> ".l:path
-            echohl FilelistPmtSuccess | echo l:prompt_suc | echohl None
+            echohl FilelistPmtSuc | echo l:prompt_suc | echohl None
 
             " refresh list
             if exists('s:filelist_bmstate') && s:filelist_bmstate
@@ -1689,11 +1689,11 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         execute 'hi! FilelistHlHelplistDes   ctermfg='.filelist#ColorName(l:hlhelplistdes)  .' ctermbg=NONE cterm=NONE guifg='.l:hlhelplistdes  .' guibg=NONE gui=NONE'
 
         " prompt message
-        hi! FilelistPmtDefault ctermfg=Gray   ctermbg=NONE cterm=Bold guifg=#B1B3B8 guibg=NONE gui=Bold
-        hi! FilelistPmtNormal  ctermfg=Blue   ctermbg=NONE cterm=Bold guifg=#79BBFF guibg=NONE gui=Bold
-        hi! FilelistPmtSuccess ctermfg=Green  ctermbg=NONE cterm=Bold guifg=#95D475 guibg=NONE gui=Bold
-        hi! FilelistPmtWarning ctermfg=Yellow ctermbg=NONE cterm=Bold guifg=#EEBE77 guibg=NONE gui=Bold
-        hi! FilelistPmtError   ctermfg=Red    ctermbg=NONE cterm=Bold guifg=#F56C6C guibg=NONE gui=Bold
+        hi! FilelistPmtDef ctermfg=Gray   ctermbg=NONE cterm=Bold guifg=#B1B3B8 guibg=NONE gui=Bold
+        hi! FilelistPmtNor ctermfg=Blue   ctermbg=NONE cterm=Bold guifg=#79BBFF guibg=NONE gui=Bold
+        hi! FilelistPmtSuc ctermfg=Green  ctermbg=NONE cterm=Bold guifg=#95D475 guibg=NONE gui=Bold
+        hi! FilelistPmtWar ctermfg=Yellow ctermbg=NONE cterm=Bold guifg=#EEBE77 guibg=NONE gui=Bold
+        hi! FilelistPmtErr ctermfg=Red    ctermbg=NONE cterm=Bold guifg=#F56C6C guibg=NONE gui=Bold
     endfunction
 
     " --------------------------------------------------
