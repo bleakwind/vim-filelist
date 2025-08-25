@@ -60,8 +60,8 @@ let g:filelist_icon.fold_open       = get(g:filelist_icon, 'fold_open',       nr
 let g:filelist_icon.file_default    = get(g:filelist_icon, 'file_default',    nr2char(0x1F4C4))
 let g:filelist_icon.file_execute    = get(g:filelist_icon, 'file_execute',    nr2char(0x1F4D9))
 let g:filelist_icon.file_symlink    = get(g:filelist_icon, 'file_symlink',    nr2char(0x1F517))
-let g:filelist_icon.bmlist_title    = get(g:filelist_icon, 'bmlist_title',    nr2char(0x1F516))
-let g:filelist_icon.helplist_title  = get(g:filelist_icon, 'helplist_title',  nr2char(0x2754))
+let g:filelist_icon.bmlist_title    = get(g:filelist_icon, 'bmlist_title',    nr2char(0x1F1E7))
+let g:filelist_icon.helplist_title  = get(g:filelist_icon, 'helplist_title',  nr2char(0x1F1ED))
 
 " file fomt
 let g:filelist_fomt                 = get(g:, 'filelist_fomt', {})
