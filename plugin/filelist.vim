@@ -1704,7 +1704,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         autocmd ColorScheme * call filelist#SetHlcolor()
         autocmd FileType filelist call filelist#SetHlcolor()
         if g:filelist_autostart ==# 1
-            autocmd VimEnter * call timer_start(0, {-> execute('FilelistOpen', '')})
+            autocmd VimEnter * call timer_start(0, {-> filelist#Open()})
         endif
     augroup END
 
