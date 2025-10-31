@@ -321,17 +321,17 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
         let l:mark_col = len(l:prefix) + 1
         let l:mark_width = strlen(l:mark)
-        let l:mark_id = matchaddpos('FilelistHlSetMark', [[l:line_num, l:mark_col, l:mark_width]])
+        let l:mark_id = matchaddpos('FilelistHlSetMark', [[l:line_num, l:mark_col, l:mark_width]], -1)
         call add(w:filelist_highlight, l:mark_id)
 
         let l:icon_col = len(l:prefix) + strlen(l:mark) + 1 + 1
         let l:icon_width = strlen(l:icon)
-        let l:icon_id = matchaddpos('FilelistHlSetIcon', [[l:line_num, l:icon_col, l:icon_width]])
+        let l:icon_id = matchaddpos('FilelistHlSetIcon', [[l:line_num, l:icon_col, l:icon_width]], -1)
         call add(w:filelist_highlight, l:icon_id)
 
         let l:cont_col = len(l:prefix) + strlen(l:mark) + 1 + strlen(l:icon) + 1 + 1
         let l:cont_width = strlen(l:data_line) - (l:cont_col - 1)
-        let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]])
+        let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]], -1)
         call add(w:filelist_highlight, l:cont_id)
 
         " operate child
@@ -1078,17 +1078,17 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
         let l:mark_col = len(l:prefix) + 1
         let l:mark_width = strlen(l:mark)
-        let l:mark_id = matchaddpos('FilelistHlSetMark', [[l:line_num, l:mark_col, l:mark_width]])
+        let l:mark_id = matchaddpos('FilelistHlSetMark', [[l:line_num, l:mark_col, l:mark_width]], -1)
         call add(w:filelist_highlight, l:mark_id)
 
         let l:icon_col = len(l:prefix) + strlen(l:mark) + 1 + 1
         let l:icon_width = strlen(l:icon)
-        let l:icon_id = matchaddpos('FilelistHlSetIcon', [[l:line_num, l:icon_col, l:icon_width]])
+        let l:icon_id = matchaddpos('FilelistHlSetIcon', [[l:line_num, l:icon_col, l:icon_width]], -1)
         call add(w:filelist_highlight, l:icon_id)
 
         let l:cont_col = len(l:prefix) + strlen(l:mark) + 1 + strlen(l:icon) + 1 + 1
         let l:cont_width = strlen(l:data_line) - (l:cont_col - 1)
-        let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]])
+        let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]], -1)
         call add(w:filelist_highlight, l:cont_id)
 
         " loop bmdata
@@ -1134,17 +1134,17 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
                 let l:mark_col = len(l:prefix) + 1
                 let l:mark_width = strlen(l:mark)
-                let l:mark_id = matchaddpos('FilelistHlSetMark', [[l:line_num, l:mark_col, l:mark_width]])
+                let l:mark_id = matchaddpos('FilelistHlSetMark', [[l:line_num, l:mark_col, l:mark_width]], -1)
                 call add(w:filelist_highlight, l:mark_id)
 
                 let l:icon_col = len(l:prefix) + strlen(l:mark) + 1 + 1
                 let l:icon_width = strlen(l:icon)
-                let l:icon_id = matchaddpos('FilelistHlSetIcon', [[l:line_num, l:icon_col, l:icon_width]])
+                let l:icon_id = matchaddpos('FilelistHlSetIcon', [[l:line_num, l:icon_col, l:icon_width]], -1)
                 call add(w:filelist_highlight, l:icon_id)
 
                 let l:cont_col = len(l:prefix) + strlen(l:mark) + 1 + strlen(l:icon) + 1 + 1
                 let l:cont_width = strlen(l:data_line) - (l:cont_col - 1)
-                let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]])
+                let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]], -1)
                 call add(w:filelist_highlight, l:cont_id)
 
             endfor
@@ -1362,17 +1362,17 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
         let l:mark_col = len(l:prefix) + 1
         let l:mark_width = strlen(l:mark)
-        let l:mark_id = matchaddpos('FilelistHlSetMark', [[l:line_num, l:mark_col, l:mark_width]])
+        let l:mark_id = matchaddpos('FilelistHlSetMark', [[l:line_num, l:mark_col, l:mark_width]], -1)
         call add(w:filelist_highlight, l:mark_id)
 
         let l:icon_col = len(l:prefix) + strlen(l:mark) + 1 + 1
         let l:icon_width = strlen(l:icon)
-        let l:icon_id = matchaddpos('FilelistHlSetIcon', [[l:line_num, l:icon_col, l:icon_width]])
+        let l:icon_id = matchaddpos('FilelistHlSetIcon', [[l:line_num, l:icon_col, l:icon_width]], -1)
         call add(w:filelist_highlight, l:icon_id)
 
         let l:cont_col = len(l:prefix) + strlen(l:mark) + 1 + strlen(l:icon) + 1 + 1
         let l:cont_width = strlen(l:data_line) - (l:cont_col - 1)
-        let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]])
+        let l:cont_id = matchaddpos(l:hl_name, [[l:line_num, l:cont_col, l:cont_width]], -1)
         call add(w:filelist_highlight, l:cont_id)
 
         " loop helpdata
@@ -1389,12 +1389,12 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
             let l:key_col = len(l:prefix) + 1
             let l:key_width = strlen(l:key)
-            let l:key_id = matchaddpos('FilelistHlHelplistKey', [[l:line_num, l:key_col, l:key_width]])
+            let l:key_id = matchaddpos('FilelistHlHelplistKey', [[l:line_num, l:key_col, l:key_width]], -1)
             call add(w:filelist_highlight, l:key_id)
 
             let l:cont_col = len(l:prefix) + strlen(l:key) + 1
             let l:cont_width = strlen(l:cont)
-            let l:cont_id = matchaddpos('FilelistHlHelplistDes', [[l:line_num, l:cont_col, l:cont_width]])
+            let l:cont_id = matchaddpos('FilelistHlHelplistDes', [[l:line_num, l:cont_col, l:cont_width]], -1)
             call add(w:filelist_highlight, l:cont_id)
         endfor
         call add(a:lines, "")
@@ -1723,3 +1723,4 @@ endif
 " ============================================================================
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
+
