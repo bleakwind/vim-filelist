@@ -96,6 +96,38 @@ let g:filelist_fomt.fomt_json       = get(g:filelist_fomt, 'fomt_json',       { 
 let g:filelist_fomt.fomt_xml        = get(g:filelist_fomt, 'fomt_xml',        { 'icon': nr2char(0x1F4F0), 'ext': ['xml'] })
 let g:filelist_fomt.fomt_yaml       = get(g:filelist_fomt, 'fomt_yaml',       { 'icon': nr2char(0x1F4CB), 'ext': ['yaml', 'yml'] })
 
+" encoding save to
+let g:filelist_Encsave              = get(g:, 'filelist_Encsave',             {})
+let g:filelist_Encsave.icon         = get(g:filelist_Encsave, 'icon',         nr2char(0x23F5))
+let g:filelist_Encsave.descr        = get(g:filelist_Encsave, 'descr',        [
+            \ 'Please select your encoding save this file...',
+            \ 'Encoding list:',
+            \ ''
+            \ ])
+let g:filelist_Encsave.index        = get(g:filelist_Encsave, 'index',        0)
+let g:filelist_Encsave.winid        = get(g:filelist_Encsave, 'winid',        0)
+let g:filelist_Encsave.matchid      = get(g:filelist_Encsave, 'matchid',      [])
+let g:filelist_Encsave.enccode      = get(g:filelist_Encsave, 'enccode',      [])
+let g:filelist_Encsave.encshow      = get(g:filelist_Encsave, 'encshow',      [])
+let g:filelist_Encsave.bomcode      = get(g:filelist_Encsave, 'bomcode',      [])
+let g:filelist_Encsave.bomshow      = get(g:filelist_Encsave, 'bomshow',      [])
+
+" encoding open as
+let g:filelist_Encopen              = get(g:, 'filelist_Encopen',             {})
+let g:filelist_Encopen.icon         = get(g:filelist_Encopen, 'icon',         nr2char(0x23F5))
+let g:filelist_Encopen.descr        = get(g:filelist_Encopen, 'descr',        [
+            \ 'Please select your encoding reopen this file...',
+            \ 'Encoding list:',
+            \ ''
+            \ ])
+let g:filelist_Encopen.index        = get(g:filelist_Encopen, 'index',        0)
+let g:filelist_Encopen.winid        = get(g:filelist_Encopen, 'winid',        0)
+let g:filelist_Encopen.matchid      = get(g:filelist_Encopen, 'matchid',      [])
+let g:filelist_Encopen.enccode      = get(g:filelist_Encopen, 'enccode',      [])
+let g:filelist_Encopen.encshow      = get(g:filelist_Encopen, 'encshow',      [])
+let g:filelist_Encopen.bomcode      = get(g:filelist_Encopen, 'bomcode',      [])
+let g:filelist_Encopen.bomshow      = get(g:filelist_Encopen, 'bomshow',      [])
+
 " plugin variable
 let s:filelist_bufnbr               = -1
 let s:filelist_winidn               = -1
@@ -817,9 +849,14 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     function! filelist#LocateFile() abort
         if !filelist#IsSpecial(bufnr('%'))
 
+            " prompt file not saved
+            let l:prompt_sav = "This file is not save yet..."
+
             " get filepath
             let l:curr_file = expand('%:p')
-            if !empty(l:curr_file)
+            if empty(l:curr_file)
+                echohl FilelistPmtErr | echo l:prompt_sav | echohl None
+            else
 
                 " check win
                 if s:filelist_winidn ==# -1 || win_id2win(s:filelist_winidn) ==# 0
@@ -933,6 +970,402 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             endif
         endwhile
         return l:process_line
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#EncsaveFilter
+    " --------------------------------------------------
+    function! filelist#EncsaveFilter(wid, key) abort
+        " get the length and selected index
+        let l:showlen = len(g:filelist_Encsave.encshow) + len(g:filelist_Encsave.bomshow)
+        let l:lastidx = g:filelist_Encsave.index
+
+        " get the number of descr
+        let l:descr_count = len(g:filelist_Encsave.descr)
+
+        " handle up arrow or 'k' key - move up
+        if a:key == "\<Up>" || a:key == 'k'
+            let g:filelist_Encsave.index = (g:filelist_Encsave.index - 1 + l:showlen) % l:showlen
+            if g:filelist_Encsave.index != l:lastidx
+                call filelist#EncsaveUpdate(a:wid)
+            endif
+        " handle down arrow or 'j' key - move down
+        elseif a:key == "\<Down>" || a:key == 'j'
+            let g:filelist_Encsave.index = (g:filelist_Encsave.index + 1) % l:showlen
+            if g:filelist_Encsave.index != l:lastidx
+                call filelist#EncsaveUpdate(a:wid)
+            endif
+        " handle enter key - confirm selection
+        elseif a:key == "\<CR>"
+            call filelist#EncsaveFinish(a:wid, g:filelist_Encsave.index + 1)
+        " handle mouse click events
+        elseif a:key == "\<LeftMouse>" || a:key == "\<2-LeftMouse>"
+            let l:mouse_pos = getmousepos()
+            if !empty(l:mouse_pos) && has_key(l:mouse_pos, 'line')
+                let l:clicked_line = l:mouse_pos.line
+                if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
+                    let g:filelist_Encsave.index = l:clicked_line - l:descr_count - 1
+                    call filelist#EncsaveUpdate(a:wid)
+                    let l:wid = a:wid
+                    let l:selected_idx = g:filelist_Encsave.index
+                    call timer_start(300, {-> filelist#EncsaveFinish(l:wid, l:selected_idx + 1)})
+                endif
+            endif
+        " handle esc key - cancel
+        elseif a:key == "\<Esc>"
+            call filelist#EncsaveFinish(a:wid, 0)
+        endif
+
+        " indicate already handled
+        return 1
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#EncsaveUpdate
+    " --------------------------------------------------
+    function! filelist#EncsaveUpdate(wid) abort
+        " add descr text to display list
+        let l:show_data = []
+        let l:descr_count = len(g:filelist_Encsave.descr)
+        let l:popup_width = winwidth(a:wid)
+        call extend(l:show_data, g:filelist_Encsave.descr)
+
+        " iterate through all options to build display lines
+        for il in range(len(g:filelist_Encsave.encshow))
+            " selected option shows icon
+            if il == g:filelist_Encsave.index
+                let l:base_text = ' ' . g:filelist_Encsave.icon . ' ' . g:filelist_Encsave.encshow[il]
+            else
+                let l:base_text = '   ' . g:filelist_Encsave.encshow[il]
+            endif
+            " pad all lines with spaces
+            let l:text_len = strdisplaywidth(l:base_text)
+            if l:text_len < l:popup_width
+                call add(l:show_data, l:base_text . repeat(' ', l:popup_width - l:text_len))
+            else
+                call add(l:show_data, l:base_text)
+            endif
+        endfor
+
+        " iterate through all options to build display lines
+        for il in range(len(g:filelist_Encsave.bomshow))
+            " selected option shows icon
+            if (len(g:filelist_Encsave.encshow) + il) == g:filelist_Encsave.index
+                let l:base_text = ' ' . g:filelist_Encsave.icon . ' ' . g:filelist_Encsave.bomshow[il]
+            else
+                let l:base_text = '   ' . g:filelist_Encsave.bomshow[il]
+            endif
+            " pad all lines with spaces
+            let l:text_len = strdisplaywidth(l:base_text)
+            if l:text_len < l:popup_width
+                call add(l:show_data, l:base_text . repeat(' ', l:popup_width - l:text_len))
+            else
+                call add(l:show_data, l:base_text)
+            endif
+        endfor
+
+        " update popup window content
+        call popup_settext(a:wid, l:show_data)
+
+        " remove previous highlight matches
+        for id in g:filelist_Encsave.matchid
+            silent! call matchdelete(id, a:wid)
+        endfor
+        let g:filelist_Encsave.matchid = []
+
+        " add highlight for currently selected line
+        let l:cursor_line = l:descr_count + g:filelist_Encsave.index + 1
+        let l:pattern = '\%' . l:cursor_line . 'l.*'
+        let l:match_id = matchadd('PmenuSel', l:pattern, 20, -1, {'window': a:wid})
+        call add(g:filelist_Encsave.matchid, l:match_id)
+
+        " move cursor to selected line
+        call win_execute(a:wid, 'call cursor(' . l:cursor_line . ', 1)')
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#EncsaveFinish
+    " --------------------------------------------------
+    function! filelist#EncsaveFinish(wid, idx) abort
+        " operation cancelled
+        if a:idx == 0
+            echo "Operation cancelled..."
+        " encoding list
+        elseif a:idx > 0 && a:idx <= len(g:filelist_Encsave.enccode)
+            let l:code = g:filelist_Encsave.enccode[a:idx - 1]
+            execute 'write ++enc='.l:code.' '.fnameescape(substitute(expand("%:p"), '\v[\/\\]+\c', '/', 'g'))
+            execute 'set fileencoding='.l:code.''
+            silent execute 'write'
+            redraw
+            echohl FilelistPmtSuc | echo "Converted encoding to ".l:code." successful..." | echohl None
+        " bom list
+        elseif a:idx > len(g:filelist_Encsave.enccode) && a:idx <= (len(g:filelist_Encsave.enccode) + len(g:filelist_Encsave.bomcode))
+            let l:code = g:filelist_Encsave.bomcode[a:idx - len(g:filelist_Encsave.enccode) - 1]
+            if l:code ==# 'bom_add'
+                execute 'setlocal bomb'
+                silent execute 'write'
+                redraw
+                echohl FilelistPmtSuc | echo "Add bomb header to file successful..." | echohl None
+            elseif l:code ==# 'bom_rmv'
+                execute 'setlocal nobomb'
+                silent execute 'write'
+                redraw
+                echohl FilelistPmtSuc | echo "Remove bomb header from file successful..." | echohl None
+            endif
+        " incorrect operation
+        else
+            echo "Incorrect operation cancelled..."
+        endif
+        " close popup window
+        call popup_close(a:wid)
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#EncsaveTo
+    " --------------------------------------------------
+    function! filelist#EncsaveTo(...) abort
+        if !filelist#IsSpecial(bufnr('%'))
+
+            " prompt file not saved
+            let l:prompt_sav = "This file is not save yet..."
+
+            " get filepath
+            let l:curr_file = expand('%:p')
+            if empty(l:curr_file)
+                echohl FilelistPmtErr | echo l:prompt_sav | echohl None
+            else
+
+                " reset variable
+                let g:filelist_Encsave.enccode = []
+                let g:filelist_Encsave.encshow = []
+                let g:filelist_Encsave.bomcode = []
+                let g:filelist_Encsave.bomshow = []
+                let g:filelist_Encsave.index = 0
+
+                " set encoding list
+                let g:filelist_Encsave.enccode = split(&fileencodings, ',')
+                for il in range(len(g:filelist_Encsave.enccode))
+                    call add(g:filelist_Encsave.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_Encsave.enccode[il]))
+                endfor
+
+                " set bom list
+                call add(g:filelist_Encsave.bomcode, 'bom_add')
+                call add(g:filelist_Encsave.bomshow, printf("%2s: Add bomb header to file", len(g:filelist_Encsave.enccode) + 1))
+                call add(g:filelist_Encsave.bomcode, 'bom_rmv')
+                call add(g:filelist_Encsave.bomshow, printf("%2s: Remove bomb header from file", len(g:filelist_Encsave.enccode) + 2))
+
+                " set options
+                " \ 'borderchars': ['─', '│', '─', '│', '┌', '┐', '┘', '└'],
+                let l:options = {
+                            \ 'filter': function('filelist#EncsaveFilter'),
+                            \ 'title': '',
+                            \ 'highlight': 'PopupNotification',
+                            \ 'border': [1, 1, 1, 1],
+                            \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                            \ 'borderhighlight': ['PopupNotification'],
+                            \ 'scrollbar': 1,
+                            \ 'scrollbarhighlight': 'PmenuSbar',
+                            \ 'thumbhighlight': 'PmenuThumb',
+                            \ 'pos': 'center',
+                            \ 'fixed': 1,
+                            \ 'flip': 1,
+                            \ 'wrap': 0,
+                            \ 'padding': [0, 2, 0, 2],
+                            \ 'minwidth': 60,
+                            \ 'maxwidth': 100,
+                            \ 'minheight': 10,
+                            \ 'maxheight': 30,
+                            \ 'zindex': 100,
+                            \ 'cursorline': 0,
+                            \ 'mapping': 0
+                            \ }
+
+                " create popup win
+                let g:filelist_Encsave.winid = popup_create('', l:options)
+                if g:filelist_Encsave.winid > 0
+                    call filelist#EncsaveUpdate(g:filelist_Encsave.winid)
+                endif
+
+            endif
+        endif
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#EncopenFilter
+    " --------------------------------------------------
+    function! filelist#EncopenFilter(wid, key) abort
+        " get the length and selected index
+        let l:showlen = len(g:filelist_Encopen.encshow)
+        let l:lastidx = g:filelist_Encopen.index
+
+        " get the number of descr
+        let l:descr_count = len(g:filelist_Encopen.descr)
+
+        " handle up arrow or 'k' key - move up
+        if a:key == "\<Up>" || a:key == 'k'
+            let g:filelist_Encopen.index = (g:filelist_Encopen.index - 1 + l:showlen) % l:showlen
+            if g:filelist_Encopen.index != l:lastidx
+                call filelist#EncopenUpdate(a:wid)
+            endif
+        " handle down arrow or 'j' key - move down
+        elseif a:key == "\<Down>" || a:key == 'j'
+            let g:filelist_Encopen.index = (g:filelist_Encopen.index + 1) % l:showlen
+            if g:filelist_Encopen.index != l:lastidx
+                call filelist#EncopenUpdate(a:wid)
+            endif
+        " handle enter key - confirm selection
+        elseif a:key == "\<CR>"
+            call filelist#EncopenFinish(a:wid, g:filelist_Encopen.index + 1)
+        " handle mouse click events
+        elseif a:key == "\<LeftMouse>" || a:key == "\<2-LeftMouse>"
+            let l:mouse_pos = getmousepos()
+            if !empty(l:mouse_pos) && has_key(l:mouse_pos, 'line')
+                let l:clicked_line = l:mouse_pos.line
+                if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
+                    let g:filelist_Encopen.index = l:clicked_line - l:descr_count - 1
+                    call filelist#EncopenUpdate(a:wid)
+                    let l:wid = a:wid
+                    let l:selected_idx = g:filelist_Encopen.index
+                    call timer_start(300, {-> filelist#EncopenFinish(l:wid, l:selected_idx + 1)})
+                endif
+            endif
+        " handle esc key - cancel
+        elseif a:key == "\<Esc>"
+            call filelist#EncopenFinish(a:wid, 0)
+        endif
+
+        " indicate already handled
+        return 1
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#EncopenUpdate
+    " --------------------------------------------------
+    function! filelist#EncopenUpdate(wid) abort
+        " add descr text to display list
+        let l:show_data = []
+        let l:descr_count = len(g:filelist_Encopen.descr)
+        let l:popup_width = winwidth(a:wid)
+        call extend(l:show_data, g:filelist_Encopen.descr)
+
+        " iterate through all options to build display lines
+        for il in range(len(g:filelist_Encopen.encshow))
+            " selected option shows icon
+            if il == g:filelist_Encopen.index
+                let l:base_text = ' ' . g:filelist_Encopen.icon . ' ' . g:filelist_Encopen.encshow[il]
+            else
+                let l:base_text = '   ' . g:filelist_Encopen.encshow[il]
+            endif
+            " pad all lines with spaces
+            let l:text_len = strdisplaywidth(l:base_text)
+            if l:text_len < l:popup_width
+                call add(l:show_data, l:base_text . repeat(' ', l:popup_width - l:text_len))
+            else
+                call add(l:show_data, l:base_text)
+            endif
+        endfor
+
+        " update popup window content
+        call popup_settext(a:wid, l:show_data)
+
+        " remove previous highlight matches
+        for id in g:filelist_Encopen.matchid
+            silent! call matchdelete(id, a:wid)
+        endfor
+        let g:filelist_Encopen.matchid = []
+
+        " add highlight for currently selected line
+        let l:cursor_line = l:descr_count + g:filelist_Encopen.index + 1
+        let l:pattern = '\%' . l:cursor_line . 'l.*'
+        let l:match_id = matchadd('PmenuSel', l:pattern, 20, -1, {'window': a:wid})
+        call add(g:filelist_Encopen.matchid, l:match_id)
+
+        " move cursor to selected line
+        call win_execute(a:wid, 'call cursor(' . l:cursor_line . ', 1)')
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#EncopenFinish
+    " --------------------------------------------------
+    function! filelist#EncopenFinish(wid, idx) abort
+        " operation cancelled
+        if a:idx == 0
+            echo "Operation cancelled..."
+        " encoding list
+        elseif a:idx > 0 && a:idx <= len(g:filelist_Encopen.enccode)
+            let l:code = g:filelist_Encopen.enccode[a:idx - 1]
+            execute 'edit ++enc='.l:code.' '.fnameescape(substitute(expand("%:p"), '\v[\/\\]+\c', '/', 'g'))
+            execute 'setlocal noreadonly'
+            redraw
+            echohl FilelistPmtSuc | echo "Reopen with encoding ".l:code." successful..." | echohl None
+        " incorrect operation
+        else
+            echo "Incorrect operation cancelled..."
+        endif
+        " close popup window
+        call popup_close(a:wid)
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#EncopenAs
+    " --------------------------------------------------
+    function! filelist#EncopenAs(...) abort
+        if !filelist#IsSpecial(bufnr('%'))
+
+            " prompt file not saved
+            let l:prompt_sav = "This file is not save yet..."
+
+            " get filepath
+            let l:curr_file = expand('%:p')
+            if empty(l:curr_file)
+                echohl FilelistPmtErr | echo l:prompt_sav | echohl None
+            else
+
+                " reset variable
+                let g:filelist_Encopen.enccode = []
+                let g:filelist_Encopen.encshow = []
+                let g:filelist_Encopen.index = 0
+
+                " set encoding list
+                let g:filelist_Encopen.enccode = split(&fileencodings, ',')
+                for il in range(len(g:filelist_Encopen.enccode))
+                    call add(g:filelist_Encopen.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_Encopen.enccode[il]))
+                endfor
+
+                " set options
+                " \ 'borderchars': ['─', '│', '─', '│', '┌', '┐', '┘', '└'],
+                let l:options = {
+                            \ 'filter': function('filelist#EncopenFilter'),
+                            \ 'title': '',
+                            \ 'highlight': 'PopupNotification',
+                            \ 'border': [1, 1, 1, 1],
+                            \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                            \ 'borderhighlight': ['PopupNotification'],
+                            \ 'scrollbar': 1,
+                            \ 'scrollbarhighlight': 'PmenuSbar',
+                            \ 'thumbhighlight': 'PmenuThumb',
+                            \ 'pos': 'center',
+                            \ 'fixed': 1,
+                            \ 'flip': 1,
+                            \ 'wrap': 0,
+                            \ 'padding': [0, 2, 0, 2],
+                            \ 'minwidth': 60,
+                            \ 'maxwidth': 100,
+                            \ 'minheight': 10,
+                            \ 'maxheight': 30,
+                            \ 'zindex': 100,
+                            \ 'cursorline': 0,
+                            \ 'mapping': 0
+                            \ }
+
+                " create popup win
+                let g:filelist_Encopen.winid = popup_create('', l:options)
+                if g:filelist_Encopen.winid > 0
+                    call filelist#EncopenUpdate(g:filelist_Encopen.winid)
+                endif
+
+            endif
+        endif
     endfunction
 
     " --------------------------------------------------
@@ -1715,6 +2148,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     command! -nargs=? FilelistClose call filelist#Close()
     command! -nargs=? FilelistToggle call filelist#Toggle()
     command! -nargs=? FilelistLocateFile call filelist#LocateFile()
+    command! -nargs=? FilelistEncsaveTo call filelist#EncsaveTo()
+    command! -nargs=? FilelistEncopenAs call filelist#EncopenAs()
 
 endif
 

@@ -83,6 +83,8 @@ let g:filelist_hlhelplistdes = '#A1ACA3'
 | `:FilelistClose`      | Close the filelist                  |
 | `:FilelistToggle`     | Toggle the filelist                 |
 | `:FilelistLocateFile` | Locate current file in the filelist |
+| `:FilelistEncsaveTo`  | Convert file encoding and save      |
+| `:FilelistEncopenAs`  | Reopen file with encoding           |
 
 ## Key Mappings
 
@@ -105,3 +107,4 @@ let g:filelist_hlhelplistdes = '#A1ACA3'
 
 ## License
 BSD 2-Clause - See LICENSE file
+
