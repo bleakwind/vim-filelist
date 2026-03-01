@@ -35,26 +35,27 @@ let g:filelist_showhide             = get(g:, 'filelist_showhide',            0)
 let g:filelist_datapath             = get(g:, 'filelist_datapath',            $HOME.'/.vim/filelist')
 
 " fold and file color
-let g:filelist_hlsetmark            = get(g:, 'filelist_hlsetmark',           '#A1ACA3')
-let g:filelist_hlseticon            = get(g:, 'filelist_hlseticon',           '#A1ACA3')
-let g:filelist_hlfoldclose          = get(g:, 'filelist_hlfoldclose',         '#92BDE8')
-let g:filelist_hlfoldopen           = get(g:, 'filelist_hlfoldopen',          '#92BDE8')
-let g:filelist_hlfiledefault        = get(g:, 'filelist_hlfiledefault',       '#DDDDDD')
-let g:filelist_hlfileexecute        = get(g:, 'filelist_hlfileexecute',       '#EEBE77')
-let g:filelist_hlfilesymlink        = get(g:, 'filelist_hlfilesymlink',       '#95D475')
-let g:filelist_hlbmlisttitle        = get(g:, 'filelist_hlbmlisttitle',       '#92BDE8')
-let g:filelist_hlhelplisttitle      = get(g:, 'filelist_hlhelplisttitle',     '#92BDE8')
-let g:filelist_hlhelplistkey        = get(g:, 'filelist_hlhelplistkey',       '#EEBE77')
-let g:filelist_hlhelplistdes        = get(g:, 'filelist_hlhelplistdes',       '#A1ACA3')
+let g:filelist_hl                   = get(g:, 'filelist_hl',                  {})
+let g:filelist_hl.setmark           = get(g:filelist_hl, 'setmark',           '#A1ACA3')
+let g:filelist_hl.seticon           = get(g:filelist_hl, 'seticon',           '#A1ACA3')
+let g:filelist_hl.foldclose         = get(g:filelist_hl, 'foldclose',         '#92BDE8')
+let g:filelist_hl.foldopen          = get(g:filelist_hl, 'foldopen',          '#92BDE8')
+let g:filelist_hl.filedefault       = get(g:filelist_hl, 'filedefault',       '#DDDDDD')
+let g:filelist_hl.fileexecute       = get(g:filelist_hl, 'fileexecute',       '#EEBE77')
+let g:filelist_hl.filesymlink       = get(g:filelist_hl, 'filesymlink',       '#95D475')
+let g:filelist_hl.bmlisttitle       = get(g:filelist_hl, 'bmlisttitle',       '#92BDE8')
+let g:filelist_hl.helplisttitle     = get(g:filelist_hl, 'helplisttitle',     '#92BDE8')
+let g:filelist_hl.helplistkey       = get(g:filelist_hl, 'helplistkey',       '#EEBE77')
+let g:filelist_hl.helplistdes       = get(g:filelist_hl, 'helplistdes',       '#A1ACA3')
 
 " file mark
-let g:filelist_mark                 = get(g:, 'filelist_mark', {})
+let g:filelist_mark                 = get(g:, 'filelist_mark',                {})
 let g:filelist_mark.collapsed       = get(g:filelist_mark, 'collapsed',       nr2char(0x23F5))
 let g:filelist_mark.expanded        = get(g:filelist_mark, 'expanded',        nr2char(0x23F7))
 let g:filelist_mark.reserve         = get(g:filelist_mark, 'reserve',         ' ')
 
 " file type
-let g:filelist_icon                 = get(g:, 'filelist_icon', {})
+let g:filelist_icon                 = get(g:, 'filelist_icon',                {})
 let g:filelist_icon.fold_close      = get(g:filelist_icon, 'fold_close',      nr2char(0x1F4C1))
 let g:filelist_icon.fold_open       = get(g:filelist_icon, 'fold_open',       nr2char(0x1F4C2))
 let g:filelist_icon.file_default    = get(g:filelist_icon, 'file_default',    nr2char(0x1F4C4))
@@ -64,7 +65,7 @@ let g:filelist_icon.bmlist_title    = get(g:filelist_icon, 'bmlist_title',    nr
 let g:filelist_icon.helplist_title  = get(g:filelist_icon, 'helplist_title',  nr2char(0x1F1ED))
 
 " file fomt
-let g:filelist_fomt                 = get(g:, 'filelist_fomt', {})
+let g:filelist_fomt                 = get(g:, 'filelist_fomt',                {})
 let g:filelist_fomt.fomt_mp3        = get(g:filelist_fomt, 'fomt_mp3',        { 'icon': nr2char(0x1F3B5), 'ext': ['mp3'] })
 let g:filelist_fomt.fomt_mp4        = get(g:filelist_fomt, 'fomt_mp4',        { 'icon': nr2char(0x1F3AC), 'ext': ['mp4'] })
 let g:filelist_fomt.fomt_php        = get(g:filelist_fomt, 'fomt_php',        { 'icon': nr2char(0x1F418), 'ext': ['php'] })
@@ -2096,17 +2097,17 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     function! filelist#SetHlcolor(...) abort
         " check bgcolor
         let l:gbg = !empty(synIDattr(hlID('Normal'), 'bg', 'gui'))   ? synIDattr(hlID('Normal'), 'bg', 'gui')   : '#171C22'
-        let l:hlsetmark       = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlsetmark)       : g:filelist_hlsetmark
-        let l:hlseticon       = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlseticon)       : g:filelist_hlseticon
-        let l:hlfoldclose     = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlfoldclose)     : g:filelist_hlfoldclose
-        let l:hlfoldopen      = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlfoldopen)      : g:filelist_hlfoldopen
-        let l:hlfiledefault   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlfiledefault)   : g:filelist_hlfiledefault
-        let l:hlfileexecute   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlfileexecute)   : g:filelist_hlfileexecute
-        let l:hlfilesymlink   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlfilesymlink)   : g:filelist_hlfilesymlink
-        let l:hlbmlisttitle   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlbmlisttitle)   : g:filelist_hlbmlisttitle
-        let l:hlhelplisttitle = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlhelplisttitle) : g:filelist_hlhelplisttitle
-        let l:hlhelplistkey   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlhelplistkey)   : g:filelist_hlhelplistkey
-        let l:hlhelplistdes   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hlhelplistdes)   : g:filelist_hlhelplistdes
+        let l:hlsetmark       = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.setmark)       : g:filelist_hl.setmark
+        let l:hlseticon       = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.seticon)       : g:filelist_hl.seticon
+        let l:hlfoldclose     = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.foldclose)     : g:filelist_hl.foldclose
+        let l:hlfoldopen      = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.foldopen)      : g:filelist_hl.foldopen
+        let l:hlfiledefault   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.filedefault)   : g:filelist_hl.filedefault
+        let l:hlfileexecute   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.fileexecute)   : g:filelist_hl.fileexecute
+        let l:hlfilesymlink   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.filesymlink)   : g:filelist_hl.filesymlink
+        let l:hlbmlisttitle   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.bmlisttitle)   : g:filelist_hl.bmlisttitle
+        let l:hlhelplisttitle = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.helplisttitle) : g:filelist_hl.helplisttitle
+        let l:hlhelplistkey   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.helplistkey)   : g:filelist_hl.helplistkey
+        let l:hlhelplistdes   = filelist#ColorBgtype(l:gbg) ==# "White" ? filelist#ColorInvert(g:filelist_hl.helplistdes)   : g:filelist_hl.helplistdes
 
         " hl fold and file
         execute 'hi! FilelistHlSetMark       ctermfg='.filelist#ColorName(l:hlsetmark)      .' ctermbg=NONE cterm=NONE guifg='.l:hlsetmark      .' guibg=NONE gui=NONE'
