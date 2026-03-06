@@ -52,39 +52,65 @@ let g:filelist_datapath = $HOME.'/.vim/filelist'
 
 Color Customization
 ```vim
+let g:filelist_hglg = {}
 " set highlight color mark
-let g:filelist_hlsetmark     = '#A1ACA3'
+let g:filelist_hglg.setmark = '#A1ACA3'
 " set highlight color icon
-let g:filelist_hlseticon     = '#A1ACA3'
+let g:filelist_hglg.seticon = '#A1ACA3'
 " Sets highlight color for closed folder icon
-let g:filelist_hlfoldclose   = '#92BDE8'
+let g:filelist_hglg.foldclose = '#92BDE8'
 " Sets highlight color for opened folder icon
-let g:filelist_hlfoldopen    = '#92BDE8'
+let g:filelist_hglg.foldopen = '#92BDE8'
 " Sets highlight color for regular files
-let g:filelist_hlfiledefault = '#DDDDDD'
+let g:filelist_hglg.filedefault = '#DDDDDD'
 " Sets highlight color for executable files
-let g:filelist_hlfileexecute = '#EEBE77'
+let g:filelist_hglg.fileexecute = '#EEBE77'
 " Sets highlight color for symbolic files
-let g:filelist_hlfilesymlink = '#95D475'
+let g:filelist_hglg.filesymlink = '#95D475'
 " Sets highlight color for bookmark list title
-let g:filelist_hlbmlisttitle = '#92BDE8'
+let g:filelist_hglg.bmlisttitle = '#92BDE8'
 " Sets highlight color for help list title
-let g:filelist_hlhelplisttitle = '#92BDE8'
+let g:filelist_hglg.helplisttitle = '#92BDE8'
 " Sets highlight color for help list key
-let g:filelist_hlhelplistkey = '#EEBE77'
+let g:filelist_hglg.helplistkey = '#EEBE77'
 " Sets highlight color for help list description
-let g:filelist_hlhelplistdes = '#A1ACA3'
+let g:filelist_hglg.helplistdes = '#A1ACA3'
+```
+
+Copyright Management
+```vim
+let g:filelist_cprt = {}
+" Author's nickname, used in copyright notices
+let g:filelist_cprt.nickname = 'NickName'
+" Author's full name, used for complete author identification
+let g:filelist_cprt.fullname = 'FullName'
+" Author's email address for contact information
+let g:filelist_cprt.mailaddr = 'author@example.com'
+" List of program type identifiers
+let g:filelist_cprt.progtype = ['<?php', '<%asp']
+" Width of copyright information
+let g:filelist_cprt.cpywidth = 78
+" Copyright template content with the following replaceable variables:
+let g:filelist_cprt.tplcrcon = []
+    [FILENAME] - Current filename
+    [DATETIME] - Current date and time
+    [NICKNAME] - Author nickname
+    [FULLNAME] - Author full name
+    [MAILADDR] - Author email
+    [DATEYEAR] - Current year
+    [        ] - Space placeholder for alignment
 ```
 
 ## Usage
-| Command               | Description                         |
-| --------------------- | ----------------------------------- |
-| `:FilelistOpen`       | Open the filelist                   |
-| `:FilelistClose`      | Close the filelist                  |
-| `:FilelistToggle`     | Toggle the filelist                 |
-| `:FilelistLocateFile` | Locate current file in the filelist |
-| `:FilelistEncsaveTo`  | Convert file encoding and save      |
-| `:FilelistEncopenAs`  | Reopen file with encoding           |
+| Command               | Description                               |
+| --------------------- | ----------------------------------------- |
+| `:FilelistOpen`       | Open the filelist                         |
+| `:FilelistClose`      | Close the filelist                        |
+| `:FilelistToggle`     | Toggle the filelist                       |
+| `:FilelistLocateFile` | Locate current file in the filelist       |
+| `:FilelistEncsaveTo`  | Convert file encoding and save            |
+| `:FilelistEncopenAs`  | Reopen file with encoding                 |
+| `:FilelistCopyRight`  | add: Add copyright none: update copyright |
 
 ## Key Mappings
 
