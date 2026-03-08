@@ -64,38 +64,38 @@ let g:filelist_icon.file_symlink    = get(g:filelist_icon, 'file_symlink',    nr
 let g:filelist_icon.bmlist_title    = get(g:filelist_icon, 'bmlist_title',    nr2char(0x1F1E7))
 let g:filelist_icon.helplist_title  = get(g:filelist_icon, 'helplist_title',  nr2char(0x1F1ED))
 
-" file fomt
-let g:filelist_fomt                 = get(g:, 'filelist_fomt',                {})
-let g:filelist_fomt.fomt_mp3        = get(g:filelist_fomt, 'fomt_mp3',        { 'icon': nr2char(0x1F3B5), 'ext': ['mp3'] })
-let g:filelist_fomt.fomt_mp4        = get(g:filelist_fomt, 'fomt_mp4',        { 'icon': nr2char(0x1F3AC), 'ext': ['mp4'] })
-let g:filelist_fomt.fomt_php        = get(g:filelist_fomt, 'fomt_php',        { 'icon': nr2char(0x1F418), 'ext': ['php'] })
-let g:filelist_fomt.fomt_java       = get(g:filelist_fomt, 'fomt_java',       { 'icon': nr2char(0x2615),  'ext': ['java'] })
-let g:filelist_fomt.fomt_python     = get(g:filelist_fomt, 'fomt_python',     { 'icon': nr2char(0x1F40D), 'ext': ['py'] })
-let g:filelist_fomt.fomt_csharp     = get(g:filelist_fomt, 'fomt_csharp',     { 'icon': nr2char(0x1F3AF), 'ext': ['cs'] })
-let g:filelist_fomt.fomt_c          = get(g:filelist_fomt, 'fomt_c',          { 'icon': nr2char(0x1F1E8), 'ext': ['c'] })
-let g:filelist_fomt.fomt_cpp        = get(g:filelist_fomt, 'fomt_cpp',        { 'icon': nr2char(0x1F1E8), 'ext': ['cpp', 'cxx', 'h', 'hpp'] })
-let g:filelist_fomt.fomt_kotlin     = get(g:filelist_fomt, 'fomt_kotlin',     { 'icon': nr2char(0x1F1F0), 'ext': ['kt', 'kts'] })
-let g:filelist_fomt.fomt_go         = get(g:filelist_fomt, 'fomt_go',         { 'icon': nr2char(0x1F9AB), 'ext': ['go'] })
-let g:filelist_fomt.fomt_swift      = get(g:filelist_fomt, 'fomt_swift',      { 'icon': nr2char(0x1F54A), 'ext': ['swift'] })
-let g:filelist_fomt.fomt_dart       = get(g:filelist_fomt, 'fomt_dart',       { 'icon': nr2char(0x1F680), 'ext': ['dart'] })
-let g:filelist_fomt.fomt_rust       = get(g:filelist_fomt, 'fomt_rust',       { 'icon': nr2char(0x1F1F7), 'ext': ['rs'] })
-let g:filelist_fomt.fomt_ruby       = get(g:filelist_fomt, 'fomt_ruby',       { 'icon': nr2char(0x1F48E), 'ext': ['rb'] })
-let g:filelist_fomt.fomt_perl       = get(g:filelist_fomt, 'fomt_perl',       { 'icon': nr2char(0x1F42A), 'ext': ['pl', 'pm'] })
-let g:filelist_fomt.fomt_lua        = get(g:filelist_fomt, 'fomt_lua',        { 'icon': nr2char(0x1F319), 'ext': ['lua'] })
-let g:filelist_fomt.fomt_shell      = get(g:filelist_fomt, 'fomt_shell',      { 'icon': nr2char(0x1F41A), 'ext': ['sh', 'bash', 'zsh'] })
-let g:filelist_fomt.fomt_markdown   = get(g:filelist_fomt, 'fomt_markdown',   { 'icon': nr2char(0x1F5D2), 'ext': ['md', 'markdown'] })
-let g:filelist_fomt.fomt_matlab     = get(g:filelist_fomt, 'fomt_matlab',     { 'icon': nr2char(0x1F9EE), 'ext': ['m'] })
-let g:filelist_fomt.fomt_r          = get(g:filelist_fomt, 'fomt_r',          { 'icon': nr2char(0x1F4CA), 'ext': ['r', 'rmd'] })
-let g:filelist_fomt.fomt_powershell = get(g:filelist_fomt, 'fomt_powershell', { 'icon': nr2char(0x1F1F5), 'ext': ['psl'] })
-let g:filelist_fomt.fomt_makefile   = get(g:filelist_fomt, 'fomt_makefile',   { 'icon': nr2char(0x1F1F2), 'ext': ['mk','mkfile'] })
-let g:filelist_fomt.fomt_sql        = get(g:filelist_fomt, 'fomt_sql',        { 'icon': nr2char(0x1F5C4), 'ext': ['sql'] })
-let g:filelist_fomt.fomt_javascript = get(g:filelist_fomt, 'fomt_javascript', { 'icon': nr2char(0x1F1EF), 'ext': ['js'] })
-let g:filelist_fomt.fomt_typescript = get(g:filelist_fomt, 'fomt_typescript', { 'icon': nr2char(0x1F1F9), 'ext': ['ts', 'tsx'] })
-let g:filelist_fomt.fomt_html       = get(g:filelist_fomt, 'fomt_html',       { 'icon': nr2char(0x1F310), 'ext': ['html', 'htm'] })
-let g:filelist_fomt.fomt_css        = get(g:filelist_fomt, 'fomt_css',        { 'icon': nr2char(0x1F3A8), 'ext': ['css'] })
-let g:filelist_fomt.fomt_json       = get(g:filelist_fomt, 'fomt_json',       { 'icon': nr2char(0x1F4C3), 'ext': ['json'] })
-let g:filelist_fomt.fomt_xml        = get(g:filelist_fomt, 'fomt_xml',        { 'icon': nr2char(0x1F4F0), 'ext': ['xml'] })
-let g:filelist_fomt.fomt_yaml       = get(g:filelist_fomt, 'fomt_yaml',       { 'icon': nr2char(0x1F4CB), 'ext': ['yaml', 'yml'] })
+" file type
+let g:filelist_type                 = get(g:, 'filelist_type',                {})
+let g:filelist_type.file_mp3        = get(g:filelist_type, 'file_mp3',        { 'icon': nr2char(0x1F3B5), 'ext': ['mp3'] })
+let g:filelist_type.file_mp4        = get(g:filelist_type, 'file_mp4',        { 'icon': nr2char(0x1F3AC), 'ext': ['mp4'] })
+let g:filelist_type.file_php        = get(g:filelist_type, 'file_php',        { 'icon': nr2char(0x1F418), 'ext': ['php'] })
+let g:filelist_type.file_java       = get(g:filelist_type, 'file_java',       { 'icon': nr2char(0x2615),  'ext': ['java'] })
+let g:filelist_type.file_python     = get(g:filelist_type, 'file_python',     { 'icon': nr2char(0x1F40D), 'ext': ['py'] })
+let g:filelist_type.file_csharp     = get(g:filelist_type, 'file_csharp',     { 'icon': nr2char(0x1F3AF), 'ext': ['cs'] })
+let g:filelist_type.file_c          = get(g:filelist_type, 'file_c',          { 'icon': nr2char(0x1F1E8), 'ext': ['c'] })
+let g:filelist_type.file_cpp        = get(g:filelist_type, 'file_cpp',        { 'icon': nr2char(0x1F1E8), 'ext': ['cpp', 'cxx', 'h', 'hpp'] })
+let g:filelist_type.file_kotlin     = get(g:filelist_type, 'file_kotlin',     { 'icon': nr2char(0x1F1F0), 'ext': ['kt', 'kts'] })
+let g:filelist_type.file_go         = get(g:filelist_type, 'file_go',         { 'icon': nr2char(0x1F9AB), 'ext': ['go'] })
+let g:filelist_type.file_swift      = get(g:filelist_type, 'file_swift',      { 'icon': nr2char(0x1F54A), 'ext': ['swift'] })
+let g:filelist_type.file_dart       = get(g:filelist_type, 'file_dart',       { 'icon': nr2char(0x1F680), 'ext': ['dart'] })
+let g:filelist_type.file_rust       = get(g:filelist_type, 'file_rust',       { 'icon': nr2char(0x1F1F7), 'ext': ['rs'] })
+let g:filelist_type.file_ruby       = get(g:filelist_type, 'file_ruby',       { 'icon': nr2char(0x1F48E), 'ext': ['rb'] })
+let g:filelist_type.file_perl       = get(g:filelist_type, 'file_perl',       { 'icon': nr2char(0x1F42A), 'ext': ['pl', 'pm'] })
+let g:filelist_type.file_lua        = get(g:filelist_type, 'file_lua',        { 'icon': nr2char(0x1F319), 'ext': ['lua'] })
+let g:filelist_type.file_shell      = get(g:filelist_type, 'file_shell',      { 'icon': nr2char(0x1F41A), 'ext': ['sh', 'bash', 'zsh'] })
+let g:filelist_type.file_markdown   = get(g:filelist_type, 'file_markdown',   { 'icon': nr2char(0x1F5D2), 'ext': ['md', 'markdown'] })
+let g:filelist_type.file_matlab     = get(g:filelist_type, 'file_matlab',     { 'icon': nr2char(0x1F9EE), 'ext': ['m'] })
+let g:filelist_type.file_r          = get(g:filelist_type, 'file_r',          { 'icon': nr2char(0x1F4CA), 'ext': ['r', 'rmd'] })
+let g:filelist_type.file_powershell = get(g:filelist_type, 'file_powershell', { 'icon': nr2char(0x1F1F5), 'ext': ['psl'] })
+let g:filelist_type.file_makefile   = get(g:filelist_type, 'file_makefile',   { 'icon': nr2char(0x1F1F2), 'ext': ['mk','mkfile'] })
+let g:filelist_type.file_sql        = get(g:filelist_type, 'file_sql',        { 'icon': nr2char(0x1F5C4), 'ext': ['sql'] })
+let g:filelist_type.file_javascript = get(g:filelist_type, 'file_javascript', { 'icon': nr2char(0x1F1EF), 'ext': ['js'] })
+let g:filelist_type.file_typescript = get(g:filelist_type, 'file_typescript', { 'icon': nr2char(0x1F1F9), 'ext': ['ts', 'tsx'] })
+let g:filelist_type.file_html       = get(g:filelist_type, 'file_html',       { 'icon': nr2char(0x1F310), 'ext': ['html', 'htm'] })
+let g:filelist_type.file_css        = get(g:filelist_type, 'file_css',        { 'icon': nr2char(0x1F3A8), 'ext': ['css'] })
+let g:filelist_type.file_json       = get(g:filelist_type, 'file_json',       { 'icon': nr2char(0x1F4C3), 'ext': ['json'] })
+let g:filelist_type.file_xml        = get(g:filelist_type, 'file_xml',        { 'icon': nr2char(0x1F4F0), 'ext': ['xml'] })
+let g:filelist_type.file_yaml       = get(g:filelist_type, 'file_yaml',       { 'icon': nr2char(0x1F4CB), 'ext': ['yaml', 'yml'] })
 
 " encoding save to
 let g:filelist_ecst                 = get(g:, 'filelist_ecst',                {})
@@ -353,11 +353,11 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
             " file icon
             let l:ext = fnamemodify(a:node.path, ':e')
-            let l:found_fomt = 0
-            for [name, config] in items(g:filelist_fomt)
+            let l:found_type = 0
+            for [name, config] in items(g:filelist_type)
                 if index(config.ext, l:ext) != -1
                     let l:icon = config.icon
-                    let l:found_fomt = 1
+                    let l:found_type = 1
                     break
                 endif
             endfor
@@ -1758,11 +1758,11 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
                     " file icon
                     let l:ext = fnamemodify(il.path, ':e')
-                    let l:found_fomt = 0
-                    for [name, config] in items(g:filelist_fomt)
+                    let l:found_type = 0
+                    for [name, config] in items(g:filelist_type)
                         if index(config.ext, l:ext) != -1
                             let l:icon = config.icon
-                            let l:found_fomt = 1
+                            let l:found_type = 1
                             break
                         endif
                     endfor
