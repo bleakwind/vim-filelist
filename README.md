@@ -108,8 +108,8 @@ let g:filelist_cprt.tplcrcon = []
 | `:FilelistClose`      | Close the filelist                        |
 | `:FilelistToggle`     | Toggle the filelist                       |
 | `:FilelistLocateFile` | Locate current file in the filelist       |
-| `:FilelistEncsaveTo`  | Convert file encoding and save            |
-| `:FilelistEncopenAs`  | Reopen file with encoding                 |
+| `:FilelistEncSaveto`  | Convert file encoding and save            |
+| `:FilelistEncOpenas`  | Reopen file with encoding                 |
 | `:FilelistCopyRight`  | add: Add copyright none: update copyright |
 
 ## Key Mappings

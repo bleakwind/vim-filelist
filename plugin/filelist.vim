@@ -204,7 +204,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     " --------------------------------------------------
     function! filelist#IsSpecial(...) abort
         let l:ret = 0
-        if a:0 > 0
+        if exists('a:1')
             let l:buftype = getbufvar(a:1, '&buftype')
             let l:ret = l:buftype != '' && l:buftype != 'help' ? 1 : 0
         endif
@@ -243,9 +243,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
             " build fldata
             if !exists('s:filelist_fldata') || empty(s:filelist_fldata)
-                call filelist#FilelistLoad(g:filelist_mainpath)
+                call filelist#ListLoad(g:filelist_mainpath)
             endif
-            call filelist#FilelistRender(s:filelist_fldata, l:lines, 0)
+            call filelist#ListRender(s:filelist_fldata, l:lines, 0)
 
             " setbufvar filelist
             call setbufvar(s:filelist_bufnbr, '&modifiable', 1)
@@ -265,9 +265,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     endfunction
 
     " --------------------------------------------------
-    " filelist#FilelistLoad
+    " filelist#ListLoad
     " --------------------------------------------------
-    function! filelist#FilelistLoad(root) abort
+    function! filelist#ListLoad(root) abort
         if isdirectory(a:root)
             execute 'cd '.fnameescape(a:root)
         endif
@@ -279,13 +279,13 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                     \ 'expand'   : 1,
                     \ 'children' : []
                     \ }
-        call filelist#FilelistBuild(s:filelist_fldata)
+        call filelist#ListBuild(s:filelist_fldata)
     endfunction
 
     " --------------------------------------------------
-    " filelist#FilelistBuild
+    " filelist#ListBuild
     " --------------------------------------------------
-    function! filelist#FilelistBuild(node) abort
+    function! filelist#ListBuild(node) abort
         if a:node.type ==# 'fold' && a:node.expand
             " read dir
             let a:node.children = []
@@ -325,9 +325,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     endfunction
 
     " --------------------------------------------------
-    " filelist#FilelistRender
+    " filelist#ListRender
     " --------------------------------------------------
-    function! filelist#FilelistRender(node, lines, level) abort
+    function! filelist#ListRender(node, lines, level) abort
         let l:prefix = repeat('  ', a:level)
 
         " init highlight
@@ -396,7 +396,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         " operate child
         if a:node.expand && has_key(a:node, 'children')
             for child in a:node.children
-                call filelist#FilelistRender(child, a:lines, a:level + 1)
+                call filelist#ListRender(child, a:lines, a:level + 1)
             endfor
         endif
     endfunction
@@ -560,7 +560,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             elseif has_key(l:node, 'type') && (l:node.type ==# 'fold' || l:node.type ==# 'file')
                 if l:node.type ==# 'fold'
                     let l:node.expand = !l:node.expand
-                    if l:node.expand | call filelist#FilelistBuild(l:node) | endif
+                    if l:node.expand | call filelist#ListBuild(l:node) | endif
                     call filelist#RefreshList()
                     " restore env
                     if win_id2win(l:orig_winidn) != 0
@@ -583,7 +583,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         let l:orig_winidn = win_getid()
 
         " check mouse
-        let l:oper = (a:0 > 0 && a:1 ==# 1) ? 1 : 2
+        let l:oper = (exists('a:1') && a:1 ==# 1) ? 1 : 2
         let l:curr_time = reltimefloat(reltime())
         if l:oper ==# 1 && (l:curr_time - s:filelist_msetimer) < 0.3
             let s:filelist_msetimer = 0
@@ -662,7 +662,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         if l:oper ==# 9
                             if l:node.type ==# 'fold'
                                 let l:node.expand = !l:node.expand
-                                if l:node.expand | call filelist#FilelistBuild(l:node) | endif
+                                if l:node.expand | call filelist#ListBuild(l:node) | endif
                                 call filelist#RefreshList()
                                 " restore env
                                 if win_id2win(l:orig_winidn) != 0
@@ -673,7 +673,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         elseif l:oper ==# 1
                             if l:node.type ==# 'fold'
                                 "let l:node.expand = !l:node.expand
-                                "if l:node.expand | call filelist#FilelistBuild(l:node) | endif
+                                "if l:node.expand | call filelist#ListBuild(l:node) | endif
                                 "call filelist#RefreshList()
                                 "" restore env
                                 "if win_id2win(l:orig_winidn) != 0
@@ -686,7 +686,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         elseif l:oper ==# 2
                             if l:node.type ==# 'fold'
                                 let l:node.expand = !l:node.expand
-                                if l:node.expand | call filelist#FilelistBuild(l:node) | endif
+                                if l:node.expand | call filelist#ListBuild(l:node) | endif
                                 call filelist#RefreshList()
                                 " restore env
                                 if win_id2win(l:orig_winidn) != 0
@@ -717,7 +717,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             let l:expand_path = filelist#GetPath(s:filelist_fldata)
 
             " refresh list
-            call filelist#FilelistLoad(g:filelist_mainpath)
+            call filelist#ListLoad(g:filelist_mainpath)
             call filelist#RestorePath(s:filelist_fldata, l:expand_path)
             call filelist#WinDatalist()
 
@@ -770,7 +770,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         execute 'cd '.fnameescape(l:parent_dir)
 
         " rebuild filelist
-        call filelist#FilelistLoad(g:filelist_mainpath)
+        call filelist#ListLoad(g:filelist_mainpath)
 
         " restore save list
         call filelist#RestorePath(s:filelist_fldata, l:paths)
@@ -853,7 +853,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     function! filelist#RestorePath(node, paths) abort
         if a:node.type ==# 'fold' && index(a:paths, a:node.path) != -1
             let a:node.expand = 1
-            call filelist#FilelistBuild(a:node)
+            call filelist#ListBuild(a:node)
             if has_key(a:node, 'children')
                 for child in a:node.children
                     call filelist#RestorePath(child, a:paths)
@@ -868,6 +868,55 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     function! filelist#ToggleHidden(...) abort
         let g:filelist_showhide = !get(g:, 'filelist_showhide', 0)
         call filelist#RefreshList()
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#FindLine
+    " --------------------------------------------------
+    function! filelist#FindLine(node) abort
+        " init message
+        let l:offset_line = 1
+
+        " offset help
+        if exists('s:filelist_helpstate') && s:filelist_helpstate
+            let l:offset_line += len(s:filelist_helpdata) + 2
+        endif
+        " offset bookmark
+        if exists('s:filelist_bmstate') && s:filelist_bmstate
+            let l:offset_line += len(s:filelist_bmdata) + 2
+        endif
+
+        " handle filelist
+        let l:process_line = l:offset_line
+        let l:fldata = s:filelist_fldata
+        while 1
+            " if found
+            if l:fldata ==# a:node
+                break
+            endif
+            " sub node
+            if l:fldata.expand && has_key(l:fldata, 'children') && !empty(l:fldata.children)
+                let l:fldata = l:fldata.children[0]
+                let l:process_line += 1
+            " node list
+            else
+                while has_key(l:fldata, 'parent')
+                    let l:par = l:fldata.parent
+                    let l:idx = index(l:par.children, l:fldata)
+                    if l:idx < len(l:par.children) - 1
+                        let l:fldata = l:par.children[l:idx + 1]
+                        let l:process_line += 1
+                        break
+                    else
+                        let l:fldata = l:par
+                    endif
+                endwhile
+                if !has_key(l:fldata, 'parent')
+                    break
+                endif
+            endif
+        endwhile
+        return l:process_line
     endfunction
 
     " --------------------------------------------------
@@ -927,7 +976,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         " ready node expand
                         if l:fldata.type ==# 'fold' && !l:fldata.expand
                             let l:fldata.expand = 1
-                            call filelist#FilelistBuild(l:fldata)
+                            call filelist#ListBuild(l:fldata)
                             call filelist#WinDatalist()
                         endif
                         " find subnode
@@ -935,7 +984,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         for child in l:fldata.children
                             if child.name ==# il
                                 let l:fldata = child
-                                let l:curr_line = filelist#LocateLine(child)
+                                let l:curr_line = filelist#FindLine(child)
                                 call setpos('.', [0, l:curr_line, 1, 0])
                                 normal! zz
                                 let l:found_fldata = 1
@@ -957,633 +1006,6 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 endif
             endif
         endif
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#LocateLine
-    " --------------------------------------------------
-    function! filelist#LocateLine(node) abort
-        " init message
-        let l:offset_line = 1
-
-        " offset help
-        if exists('s:filelist_helpstate') && s:filelist_helpstate
-            let l:offset_line += len(s:filelist_helpdata) + 2
-        endif
-        " offset bookmark
-        if exists('s:filelist_bmstate') && s:filelist_bmstate
-            let l:offset_line += len(s:filelist_bmdata) + 2
-        endif
-
-        " handle filelist
-        let l:process_line = l:offset_line
-        let l:fldata = s:filelist_fldata
-        while 1
-            " if found
-            if l:fldata ==# a:node
-                break
-            endif
-            " sub node
-            if l:fldata.expand && has_key(l:fldata, 'children') && !empty(l:fldata.children)
-                let l:fldata = l:fldata.children[0]
-                let l:process_line += 1
-            " node list
-            else
-                while has_key(l:fldata, 'parent')
-                    let l:par = l:fldata.parent
-                    let l:idx = index(l:par.children, l:fldata)
-                    if l:idx < len(l:par.children) - 1
-                        let l:fldata = l:par.children[l:idx + 1]
-                        let l:process_line += 1
-                        break
-                    else
-                        let l:fldata = l:par
-                    endif
-                endwhile
-                if !has_key(l:fldata, 'parent')
-                    break
-                endif
-            endif
-        endwhile
-        return l:process_line
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#EncsaveFilter
-    " --------------------------------------------------
-    function! filelist#EncsaveFilter(wid, key) abort
-        " get the length and selected index
-        let l:showlen = len(g:filelist_ecst.encshow) + len(g:filelist_ecst.bomshow)
-        let l:lastidx = g:filelist_ecst.index
-
-        " get the number of descr
-        let l:descr_count = len(g:filelist_ecst.descr)
-
-        " handle up arrow or 'k' key - move up
-        if a:key == "\<Up>" || a:key == 'k'
-            let g:filelist_ecst.index = (g:filelist_ecst.index - 1 + l:showlen) % l:showlen
-            if g:filelist_ecst.index != l:lastidx
-                call filelist#EncsaveUpdate(a:wid)
-            endif
-        " handle down arrow or 'j' key - move down
-        elseif a:key == "\<Down>" || a:key == 'j'
-            let g:filelist_ecst.index = (g:filelist_ecst.index + 1) % l:showlen
-            if g:filelist_ecst.index != l:lastidx
-                call filelist#EncsaveUpdate(a:wid)
-            endif
-        " handle enter key - confirm selection
-        elseif a:key == "\<CR>"
-            call filelist#EncsaveFinish(a:wid, g:filelist_ecst.index + 1)
-        " handle mouse click events
-        elseif a:key == "\<LeftMouse>" || a:key == "\<2-LeftMouse>"
-            let l:mouse_pos = getmousepos()
-            if !empty(l:mouse_pos) && has_key(l:mouse_pos, 'line')
-                let l:clicked_line = l:mouse_pos.line
-                if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
-                    let g:filelist_ecst.index = l:clicked_line - l:descr_count - 1
-                    call filelist#EncsaveUpdate(a:wid)
-                    let l:wid = a:wid
-                    let l:selected_idx = g:filelist_ecst.index
-                    call timer_start(300, {-> filelist#EncsaveFinish(l:wid, l:selected_idx + 1)})
-                endif
-            endif
-        " handle esc key - cancel
-        elseif a:key == "\<Esc>"
-            call filelist#EncsaveFinish(a:wid, 0)
-        endif
-
-        " indicate already handled
-        return 1
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#EncsaveUpdate
-    " --------------------------------------------------
-    function! filelist#EncsaveUpdate(wid) abort
-        " add descr text to display list
-        let l:show_data = []
-        let l:descr_count = len(g:filelist_ecst.descr)
-        let l:popup_width = winwidth(a:wid)
-        call extend(l:show_data, g:filelist_ecst.descr)
-
-        " iterate through all options to build display lines
-        for il in range(len(g:filelist_ecst.encshow))
-            " selected option shows icon
-            if il == g:filelist_ecst.index
-                let l:base_text = ' ' . g:filelist_ecst.icon . ' ' . g:filelist_ecst.encshow[il]
-            else
-                let l:base_text = '   ' . g:filelist_ecst.encshow[il]
-            endif
-            " pad all lines with spaces
-            let l:text_len = strdisplaywidth(l:base_text)
-            if l:text_len < l:popup_width
-                call add(l:show_data, l:base_text . repeat(' ', l:popup_width - l:text_len))
-            else
-                call add(l:show_data, l:base_text)
-            endif
-        endfor
-
-        " iterate through all options to build display lines
-        for il in range(len(g:filelist_ecst.bomshow))
-            " selected option shows icon
-            if (len(g:filelist_ecst.encshow) + il) == g:filelist_ecst.index
-                let l:base_text = ' ' . g:filelist_ecst.icon . ' ' . g:filelist_ecst.bomshow[il]
-            else
-                let l:base_text = '   ' . g:filelist_ecst.bomshow[il]
-            endif
-            " pad all lines with spaces
-            let l:text_len = strdisplaywidth(l:base_text)
-            if l:text_len < l:popup_width
-                call add(l:show_data, l:base_text . repeat(' ', l:popup_width - l:text_len))
-            else
-                call add(l:show_data, l:base_text)
-            endif
-        endfor
-
-        " update popup window content
-        call popup_settext(a:wid, l:show_data)
-
-        " remove previous highlight matches
-        for id in g:filelist_ecst.matchid
-            silent! call matchdelete(id, a:wid)
-        endfor
-        let g:filelist_ecst.matchid = []
-
-        " add highlight for currently selected line
-        let l:cursor_line = l:descr_count + g:filelist_ecst.index + 1
-        let l:pattern = '\%' . l:cursor_line . 'l.*'
-        let l:match_id = matchadd('PmenuSel', l:pattern, 20, -1, {'window': a:wid})
-        call add(g:filelist_ecst.matchid, l:match_id)
-
-        " move cursor to selected line
-        call win_execute(a:wid, 'call cursor(' . l:cursor_line . ', 1)')
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#EncsaveFinish
-    " --------------------------------------------------
-    function! filelist#EncsaveFinish(wid, idx) abort
-        " operation cancelled
-        if a:idx == 0
-            echo "Operation cancelled..."
-        " encoding list
-        elseif a:idx > 0 && a:idx <= len(g:filelist_ecst.enccode)
-            let l:code = g:filelist_ecst.enccode[a:idx - 1]
-            execute 'write ++enc='.l:code.' '.fnameescape(substitute(expand("%:p"), '\v[\/\\]+\c', '/', 'g'))
-            execute 'set fileencoding='.l:code.''
-            silent execute 'write'
-            redraw
-            echohl FilelistPmtSuc | echo "Converted encoding to ".l:code." successful..." | echohl None
-        " bom list
-        elseif a:idx > len(g:filelist_ecst.enccode) && a:idx <= (len(g:filelist_ecst.enccode) + len(g:filelist_ecst.bomcode))
-            let l:code = g:filelist_ecst.bomcode[a:idx - len(g:filelist_ecst.enccode) - 1]
-            if l:code ==# 'bom_add'
-                execute 'setlocal bomb'
-                silent execute 'write'
-                redraw
-                echohl FilelistPmtSuc | echo "Add bomb header to file successful..." | echohl None
-            elseif l:code ==# 'bom_rmv'
-                execute 'setlocal nobomb'
-                silent execute 'write'
-                redraw
-                echohl FilelistPmtSuc | echo "Remove bomb header from file successful..." | echohl None
-            endif
-        " incorrect operation
-        else
-            echo "Incorrect operation cancelled..."
-        endif
-        " close popup window
-        call popup_close(a:wid)
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#EncsaveTo
-    " --------------------------------------------------
-    function! filelist#EncsaveTo(...) abort
-        let l:orig_winidn = win_getid()
-        " check is special
-        if filelist#IsSpecial(bufnr('%'))
-            let l:basic_winidn = get(filter(map(range(1, winnr('$')), 'win_getid(v:val)'), '!filelist#IsSpecial(winbufnr(win_id2win(v:val)))'), 0, -1)
-            if l:basic_winidn != -1 && win_id2win(l:basic_winidn) != 0
-                call win_gotoid(l:basic_winidn)
-            endif
-        endif
-        " check not special
-        if !filelist#IsSpecial(bufnr('%'))
-
-            " prompt file not saved
-            let l:prompt_sav = "This file is not save yet..."
-
-            " get filepath
-            let l:curr_file = expand('%:p')
-            if empty(l:curr_file)
-                echohl FilelistPmtErr | echo l:prompt_sav | echohl None
-            else
-
-                " reset variable
-                let g:filelist_ecst.enccode = []
-                let g:filelist_ecst.encshow = []
-                let g:filelist_ecst.bomcode = []
-                let g:filelist_ecst.bomshow = []
-                let g:filelist_ecst.index = 0
-
-                " set encoding list
-                let g:filelist_ecst.enccode = split(&fileencodings, ',')
-                for il in range(len(g:filelist_ecst.enccode))
-                    call add(g:filelist_ecst.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_ecst.enccode[il]))
-                endfor
-
-                " set bom list
-                call add(g:filelist_ecst.bomcode, 'bom_add')
-                call add(g:filelist_ecst.bomshow, printf("%2s: Add bomb header to file", len(g:filelist_ecst.enccode) + 1))
-                call add(g:filelist_ecst.bomcode, 'bom_rmv')
-                call add(g:filelist_ecst.bomshow, printf("%2s: Remove bomb header from file", len(g:filelist_ecst.enccode) + 2))
-
-                " set options
-                " \ 'borderchars': ['─', '│', '─', '│', '┌', '┐', '┘', '└'],
-                let l:options = {
-                            \ 'filter': function('filelist#EncsaveFilter'),
-                            \ 'title': '',
-                            \ 'highlight': 'PopupNotification',
-                            \ 'border': [1, 1, 1, 1],
-                            \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                            \ 'borderhighlight': ['PopupNotification'],
-                            \ 'scrollbar': 1,
-                            \ 'scrollbarhighlight': 'PmenuSbar',
-                            \ 'thumbhighlight': 'PmenuThumb',
-                            \ 'pos': 'center',
-                            \ 'fixed': 1,
-                            \ 'flip': 1,
-                            \ 'wrap': 0,
-                            \ 'padding': [0, 2, 0, 2],
-                            \ 'minwidth': 60,
-                            \ 'maxwidth': 100,
-                            \ 'minheight': 10,
-                            \ 'maxheight': 30,
-                            \ 'zindex': 100,
-                            \ 'cursorline': 0,
-                            \ 'mapping': 0
-                            \ }
-
-                " create popup win
-                let g:filelist_ecst.winid = popup_create('', l:options)
-                if g:filelist_ecst.winid > 0
-                    call filelist#EncsaveUpdate(g:filelist_ecst.winid)
-                endif
-
-            endif
-        endif
-
-        " back win
-        if l:orig_winidn != 0 && win_id2win(l:orig_winidn) != 0
-            call win_gotoid(l:orig_winidn)
-        endif
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#EncopenFilter
-    " --------------------------------------------------
-    function! filelist#EncopenFilter(wid, key) abort
-        " get the length and selected index
-        let l:showlen = len(g:filelist_ecoa.encshow)
-        let l:lastidx = g:filelist_ecoa.index
-
-        " get the number of descr
-        let l:descr_count = len(g:filelist_ecoa.descr)
-
-        " handle up arrow or 'k' key - move up
-        if a:key == "\<Up>" || a:key == 'k'
-            let g:filelist_ecoa.index = (g:filelist_ecoa.index - 1 + l:showlen) % l:showlen
-            if g:filelist_ecoa.index != l:lastidx
-                call filelist#EncopenUpdate(a:wid)
-            endif
-        " handle down arrow or 'j' key - move down
-        elseif a:key == "\<Down>" || a:key == 'j'
-            let g:filelist_ecoa.index = (g:filelist_ecoa.index + 1) % l:showlen
-            if g:filelist_ecoa.index != l:lastidx
-                call filelist#EncopenUpdate(a:wid)
-            endif
-        " handle enter key - confirm selection
-        elseif a:key == "\<CR>"
-            call filelist#EncopenFinish(a:wid, g:filelist_ecoa.index + 1)
-        " handle mouse click events
-        elseif a:key == "\<LeftMouse>" || a:key == "\<2-LeftMouse>"
-            let l:mouse_pos = getmousepos()
-            if !empty(l:mouse_pos) && has_key(l:mouse_pos, 'line')
-                let l:clicked_line = l:mouse_pos.line
-                if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
-                    let g:filelist_ecoa.index = l:clicked_line - l:descr_count - 1
-                    call filelist#EncopenUpdate(a:wid)
-                    let l:wid = a:wid
-                    let l:selected_idx = g:filelist_ecoa.index
-                    call timer_start(300, {-> filelist#EncopenFinish(l:wid, l:selected_idx + 1)})
-                endif
-            endif
-        " handle esc key - cancel
-        elseif a:key == "\<Esc>"
-            call filelist#EncopenFinish(a:wid, 0)
-        endif
-
-        " indicate already handled
-        return 1
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#EncopenUpdate
-    " --------------------------------------------------
-    function! filelist#EncopenUpdate(wid) abort
-        " add descr text to display list
-        let l:show_data = []
-        let l:descr_count = len(g:filelist_ecoa.descr)
-        let l:popup_width = winwidth(a:wid)
-        call extend(l:show_data, g:filelist_ecoa.descr)
-
-        " iterate through all options to build display lines
-        for il in range(len(g:filelist_ecoa.encshow))
-            " selected option shows icon
-            if il == g:filelist_ecoa.index
-                let l:base_text = ' ' . g:filelist_ecoa.icon . ' ' . g:filelist_ecoa.encshow[il]
-            else
-                let l:base_text = '   ' . g:filelist_ecoa.encshow[il]
-            endif
-            " pad all lines with spaces
-            let l:text_len = strdisplaywidth(l:base_text)
-            if l:text_len < l:popup_width
-                call add(l:show_data, l:base_text . repeat(' ', l:popup_width - l:text_len))
-            else
-                call add(l:show_data, l:base_text)
-            endif
-        endfor
-
-        " update popup window content
-        call popup_settext(a:wid, l:show_data)
-
-        " remove previous highlight matches
-        for id in g:filelist_ecoa.matchid
-            silent! call matchdelete(id, a:wid)
-        endfor
-        let g:filelist_ecoa.matchid = []
-
-        " add highlight for currently selected line
-        let l:cursor_line = l:descr_count + g:filelist_ecoa.index + 1
-        let l:pattern = '\%' . l:cursor_line . 'l.*'
-        let l:match_id = matchadd('PmenuSel', l:pattern, 20, -1, {'window': a:wid})
-        call add(g:filelist_ecoa.matchid, l:match_id)
-
-        " move cursor to selected line
-        call win_execute(a:wid, 'call cursor(' . l:cursor_line . ', 1)')
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#EncopenFinish
-    " --------------------------------------------------
-    function! filelist#EncopenFinish(wid, idx) abort
-        " operation cancelled
-        if a:idx == 0
-            echo "Operation cancelled..."
-        " encoding list
-        elseif a:idx > 0 && a:idx <= len(g:filelist_ecoa.enccode)
-            let l:code = g:filelist_ecoa.enccode[a:idx - 1]
-            execute 'edit ++enc='.l:code.' '.fnameescape(substitute(expand("%:p"), '\v[\/\\]+\c', '/', 'g'))
-            execute 'setlocal noreadonly'
-            redraw
-            echohl FilelistPmtSuc | echo "Reopen with encoding ".l:code." successful..." | echohl None
-        " incorrect operation
-        else
-            echo "Incorrect operation cancelled..."
-        endif
-        " close popup window
-        call popup_close(a:wid)
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#EncopenAs
-    " --------------------------------------------------
-    function! filelist#EncopenAs(...) abort
-        let l:orig_winidn = win_getid()
-        " check is special
-        if filelist#IsSpecial(bufnr('%'))
-            let l:basic_winidn = get(filter(map(range(1, winnr('$')), 'win_getid(v:val)'), '!filelist#IsSpecial(winbufnr(win_id2win(v:val)))'), 0, -1)
-            if l:basic_winidn != -1 && win_id2win(l:basic_winidn) != 0
-                call win_gotoid(l:basic_winidn)
-            endif
-        endif
-        " check not special
-        if !filelist#IsSpecial(bufnr('%'))
-
-            " prompt file not saved
-            let l:prompt_sav = "This file is not save yet..."
-
-            " get filepath
-            let l:curr_file = expand('%:p')
-            if empty(l:curr_file)
-                echohl FilelistPmtErr | echo l:prompt_sav | echohl None
-            else
-
-                " reset variable
-                let g:filelist_ecoa.enccode = []
-                let g:filelist_ecoa.encshow = []
-                let g:filelist_ecoa.index = 0
-
-                " set encoding list
-                let g:filelist_ecoa.enccode = split(&fileencodings, ',')
-                for il in range(len(g:filelist_ecoa.enccode))
-                    call add(g:filelist_ecoa.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_ecoa.enccode[il]))
-                endfor
-
-                " set options
-                " \ 'borderchars': ['─', '│', '─', '│', '┌', '┐', '┘', '└'],
-                let l:options = {
-                            \ 'filter': function('filelist#EncopenFilter'),
-                            \ 'title': '',
-                            \ 'highlight': 'PopupNotification',
-                            \ 'border': [1, 1, 1, 1],
-                            \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                            \ 'borderhighlight': ['PopupNotification'],
-                            \ 'scrollbar': 1,
-                            \ 'scrollbarhighlight': 'PmenuSbar',
-                            \ 'thumbhighlight': 'PmenuThumb',
-                            \ 'pos': 'center',
-                            \ 'fixed': 1,
-                            \ 'flip': 1,
-                            \ 'wrap': 0,
-                            \ 'padding': [0, 2, 0, 2],
-                            \ 'minwidth': 60,
-                            \ 'maxwidth': 100,
-                            \ 'minheight': 10,
-                            \ 'maxheight': 30,
-                            \ 'zindex': 100,
-                            \ 'cursorline': 0,
-                            \ 'mapping': 0
-                            \ }
-
-                " create popup win
-                let g:filelist_ecoa.winid = popup_create('', l:options)
-                if g:filelist_ecoa.winid > 0
-                    call filelist#EncopenUpdate(g:filelist_ecoa.winid)
-                endif
-
-            endif
-        endif
-
-        " back win
-        if l:orig_winidn != 0 && win_id2win(l:orig_winidn) != 0
-            call win_gotoid(l:orig_winidn)
-        endif
-    endfunction
-
-    " --------------------------------------------------
-    " filelist#CopyRight
-    " --------------------------------------------------
-    function! filelist#CopyRight(...)
-        let l:prompt_result = ''
-
-        let l:orig_winidn = win_getid()
-        " check is special
-        if filelist#IsSpecial(bufnr('%'))
-            let l:basic_winidn = get(filter(map(range(1, winnr('$')), 'win_getid(v:val)'), '!filelist#IsSpecial(winbufnr(win_id2win(v:val)))'), 0, -1)
-            if l:basic_winidn != -1 && win_id2win(l:basic_winidn) != 0
-                call win_gotoid(l:basic_winidn)
-            endif
-        endif
-        " check not special
-        if !filelist#IsSpecial(bufnr('%'))
-
-            " env list
-            let l:filename         = expand("%:t")
-            let l:datetime         = strftime("%Y-%m-%d %H:%M:%S")
-            let l:dateyear         = strftime("%Y")
-
-            let l:check_copyright  = 0
-            let l:check_sameauthor = 0
-            let l:line_program     = 0
-            let l:line_copyright   = 0
-            let l:line_total       = line('$')
-            let l:prompt_item      = {}
-
-            let g:filelist_cprt.cpywidth  = max([g:filelist_cprt.cpywidth, 78])
-
-            " parse content
-            let l:i = 1
-            while l:i <= l:line_total
-                let l:content = getline(l:i)
-                " check copyright
-                if l:content =~ '\v^\s*(\/\*|\*|\+|\|).*$\c'
-                    if l:content =~ '\v^.*Author\:\s*'.CheckSlash('string', g:filelist_cprt.nickname).'\s*\(' . CheckSlash('string', g:filelist_cprt.fullname) . '\)\s*\<' . CheckSlash('string', g:filelist_cprt.mailaddr) . '\>.*$\c'
-                        let l:check_sameauthor = 1
-                    endif
-                    let l:check_copyright = 1
-                    let l:line_copyright = l:i
-                    let l:i = l:i + 1
-                " check progtype
-                elseif !empty(g:filelist_cprt.progtype) && l:content =~ '\v^\s*('.join(map(copy(g:filelist_cprt.progtype), 'CheckSlash(''string'', v:val)'), "|").').*$\c'
-                    if l:line_program ==# 0
-                        let l:line_program = l:i
-                    endif
-                    let l:i = l:i + 1
-                " check blankline
-                elseif l:content =~ '\v^\s*$\c'
-                    let l:i = l:i + 1
-                else
-                    break
-                endif
-            endwhile
-
-            " process content
-            let l:var_list = {
-                        \ 'NICKNAME': g:filelist_cprt.nickname,
-                        \ 'FULLNAME': g:filelist_cprt.fullname,
-                        \ 'MAILADDR': g:filelist_cprt.mailaddr,
-                        \ 'FILENAME': l:filename,
-                        \ 'DATETIME': l:datetime,
-                        \ 'DATEYEAR': l:dateyear
-                        \ }
-
-            if exists('a:1') && (a:1 ==# 'add' || a:1 ==# 1)
-                if l:check_copyright != 1
-                    let l:add_content = []
-                    for l:content in g:filelist_cprt.tplcrcon
-                        " replace varlist
-                        for [l:key, l:value] in items(l:var_list)
-                            let l:content = substitute(l:content, '\[' . l:key . '\]', l:value, 'g')
-                        endfor
-                        " replace space
-                        if l:content =~ '\[' . ' *' . '\]'
-                            let l:before_align = matchstr(l:content, '^.*\ze\[' . ' *' . '\]')
-                            let l:after_align = matchstr(l:content, '\[' . ' *' . '\]\zs.*$')
-                            let l:needed_spaces = g:filelist_cprt.cpywidth - strlen(l:before_align) - strlen(l:after_align)
-                            if l:needed_spaces < 0
-                                let l:content = l:before_align . ' ' . l:after_align
-                            elseif l:needed_spaces ==# 0
-                                let l:content = l:before_align . l:after_align
-                            else
-                                let l:content = l:before_align . repeat(' ', l:needed_spaces) . l:after_align
-                            endif
-                        endif
-                        call add(l:add_content, l:content)
-                    endfor
-                    call append(l:line_program, l:add_content)
-                    echohl HlPmtSuc | echo "Add Copyright successful..." | echohl None
-                else
-                    echohl HlPmtErr | echo "Already have copyright..." | echohl None
-                endif
-            else
-                if l:check_copyright ==# 1 && l:check_sameauthor ==# 1
-                    let l:i = 1
-                    while l:i <= l:line_copyright
-                        let l:content = getline(l:i)
-                        " update Id
-                        if l:content =~ '\v\$Id\:.*Exp\s*\$[ \t\[\]]*\c'
-                            let l:content = substitute(l:content,
-                                        \ '\v\$Id\:.*Exp\s*\$[ \t\[\]]*\c',
-                                        \ '\="$Id: ".l:filename." ".l:datetime." ".g:filelist_cprt.nickname." Exp $[ ]"',
-                                        \ 'g')
-                            let l:prompt_item['Filename'] = 1
-                            let l:prompt_item['Datetime'] = 1
-                        " update Copyright
-                        elseif l:content =~ '\vCopyright\s*\(c\)\s*(\d{4})\-\d{4}\s*.*\(.*\)\.[ \t\[\]]*\c'
-                            let l:content = substitute(l:content,
-                                        \ '\vCopyright\s*\(c\)\s*(\d{4})\-\d{4}\s*.*\(.*\)\.[ \t\[\]]*\c',
-                                        \ '\="Copyright (c) ".submatch(1)."-".l:dateyear." ".g:filelist_cprt.nickname."(".g:filelist_cprt.fullname.").[ ]"',
-                                        \ 'g')
-                            let l:prompt_item['Copydate'] = 1
-                        " update Filename
-                        elseif l:content =~ '\vThis source file is\s*[^ ]*\.[ \t\[\]]*\c'
-                            let l:content = substitute(l:content,
-                                        \ '\vThis source file is\s*[^ ]*\.[ \t\[\]]*\c',
-                                        \ '\="This source file is ".l:filename.".[ ]"',
-                                        \ 'g')
-                            let l:prompt_item['Intrfile'] = 1
-                        endif
-                        " replace space
-                        if l:content =~ '\[' . ' *' . '\]'
-                            let l:before_align = matchstr(l:content, '^.*\ze\[' . ' *' . '\]')
-                            let l:after_align = matchstr(l:content, '\[' . ' *' . '\]\zs.*$')
-                            let l:needed_spaces = g:filelist_cprt.cpywidth - strlen(l:before_align) - strlen(l:after_align)
-                            if l:needed_spaces < 0
-                                let l:content = l:before_align . ' ' . l:after_align
-                            elseif l:needed_spaces ==# 0
-                                let l:content = l:before_align . l:after_align
-                            else
-                                let l:content = l:before_align . repeat(' ', l:needed_spaces) . l:after_align
-                            endif
-                        endif
-                        call setline(l:i, l:content)
-                        let l:i = l:i + 1
-                    endwhile
-                    if !empty(l:prompt_item)
-                        let l:prompt_result = "Successful: Update " . join(keys(l:prompt_item), ",") . " successful..."
-                    endif
-                endif
-            endif
-        endif
-
-        " back win
-        if l:orig_winidn != 0 && win_id2win(l:orig_winidn) != 0
-            call win_gotoid(l:orig_winidn)
-        endif
-
-        return l:prompt_result
     endfunction
 
     " --------------------------------------------------
@@ -1863,7 +1285,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
         " get path
         let l:path = ''
-        if a:0 > 0
+        if exists('a:1')
             let l:path = a:1
         else
             let l:node = filelist#GetNode()
@@ -1878,16 +1300,14 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         endif
 
         " get name
-        let l:prompt_def = "Please input bookmark name: "
-        let l:prompt_fmt = "The name is incorrect. Please try again. (Press Ctrl+C to exit): "
         let l:name_def = fnamemodify(l:path, ':t')
 
-        echohl FilelistPmtNor | echo l:prompt_def | echohl None
-        let l:name_ipt = input('> ', l:name_def)
+        redraw
+        echohl FilelistPmtNor | let l:name_ipt = input('Please input bookmark name:  ', l:name_def) | echohl None
 
         while empty(l:name_ipt)
-            echohl FilelistPmtWar | echo l:prompt_fmt | echohl None
-            let l:name_ipt = input('> ', l:name_def)
+            redraw
+            echohl FilelistPmtWar | let l:name_ipt = input('The name is incorrect. Please input bookmark name again: ', l:name_def) | echohl None
         endwhile
 
         " check name
@@ -1895,8 +1315,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             " check exists
             for il in s:filelist_bmdata
                 if il.path ==# l:path
-                    let l:prompt_ext = "\nThis bookmark already exists: ".l:name_ipt." -> ".l:path
-                    echohl FilelistPmtErr | echo l:prompt_ext | echohl None
+                    redraw
+                    echohl FilelistPmtErr | echo "This bookmark already exists: ".l:name_ipt." -> ".l:path | echohl None
                     return
                 endif
             endfor
@@ -1908,8 +1328,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         \ 'type': isdirectory(l:path) ? 'bfold' : 'bfile'
                         \ })
             call filelist#BookmarkSave()
-            let l:prompt_suc = "\nThe bookmark added success: ".l:name_ipt." -> ".l:path
-            echohl FilelistPmtSuc | echo l:prompt_suc | echohl None
+
+            " add success
+            redraw
+            echohl FilelistPmtSuc | echo "The bookmark added successfully: ".l:name_ipt." -> ".l:path | echohl None
 
             " refresh list
             if exists('s:filelist_bmstate') && s:filelist_bmstate
@@ -1926,6 +1348,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             " check node
             let l:node = filelist#GetNode()
             if has_key(l:node, 'type') && (l:node.type ==# 'bfold' || l:node.type ==# 'bfile' || l:node.type ==# 'fold' || l:node.type ==# 'file')
+                let l:del_name = ''
+                let l:del_path = ''
+
                 " set new list
                 let l:items = []
                 let l:removed = 0
@@ -1934,13 +1359,23 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         call add(l:items, il)
                     else
                         let l:removed = 1
+                        let l:del_name = l:node.name
+                        let l:del_path = l:node.path
                     endif
                 endfor
+
                 " update list
+                let s:filelist_bmdata = l:items
+                call filelist#BookmarkSave()
+                call filelist#RefreshList()
+
+                " prompt message
                 if l:removed
-                    let s:filelist_bmdata = l:items
-                    call filelist#BookmarkSave()
-                    call filelist#RefreshList()
+                    redraw
+                    echohl FilelistPmtSuc | echo "This bookmark deleted successfully: ".l:del_name." -> ".l:del_path | echohl None
+                else
+                    redraw
+                    echohl FilelistPmtErr | echo "This bookmark does not exist." | echohl None
                 endif
             endif
         endif
@@ -2348,6 +1783,574 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     endfunction
 
     " --------------------------------------------------
+    " filelist#EncSaveto
+    " --------------------------------------------------
+    function! filelist#EncSaveto(...) abort
+        if exists('a:1') && a:1 ==# 'update' && exists('a:2')
+
+            " add descr text to display list
+            let l:show_data = []
+            let l:descr_count = len(g:filelist_ecst.descr)
+            let l:popup_width = winwidth(a:2)
+            call extend(l:show_data, g:filelist_ecst.descr)
+
+            " iterate through all options to build display lines
+            for il in range(len(g:filelist_ecst.encshow))
+                " selected option shows icon
+                if il == g:filelist_ecst.index
+                    let l:base_text = ' ' . g:filelist_ecst.icon . ' ' . g:filelist_ecst.encshow[il]
+                else
+                    let l:base_text = '   ' . g:filelist_ecst.encshow[il]
+                endif
+                " pad all lines with spaces
+                let l:text_len = strdisplaywidth(l:base_text)
+                if l:text_len < l:popup_width
+                    call add(l:show_data, l:base_text . repeat(' ', l:popup_width - l:text_len))
+                else
+                    call add(l:show_data, l:base_text)
+                endif
+            endfor
+
+            " iterate through all options to build display lines
+            for il in range(len(g:filelist_ecst.bomshow))
+                " selected option shows icon
+                if (len(g:filelist_ecst.encshow) + il) == g:filelist_ecst.index
+                    let l:base_text = ' ' . g:filelist_ecst.icon . ' ' . g:filelist_ecst.bomshow[il]
+                else
+                    let l:base_text = '   ' . g:filelist_ecst.bomshow[il]
+                endif
+                " pad all lines with spaces
+                let l:text_len = strdisplaywidth(l:base_text)
+                if l:text_len < l:popup_width
+                    call add(l:show_data, l:base_text . repeat(' ', l:popup_width - l:text_len))
+                else
+                    call add(l:show_data, l:base_text)
+                endif
+            endfor
+
+            " update popup window content
+            call popup_settext(a:2, l:show_data)
+
+            " remove previous highlight matches
+            for id in g:filelist_ecst.matchid
+                silent! call matchdelete(id, a:2)
+            endfor
+            let g:filelist_ecst.matchid = []
+
+            " add highlight for currently selected line
+            let l:cursor_line = l:descr_count + g:filelist_ecst.index + 1
+            let l:pattern = '\%' . l:cursor_line . 'l.*'
+            let l:match_id = matchadd('PmenuSel', l:pattern, 20, -1, {'window': a:2})
+            call add(g:filelist_ecst.matchid, l:match_id)
+
+            " move cursor to selected line
+            call win_execute(a:2, 'call cursor(' . l:cursor_line . ', 1)')
+
+        elseif exists('a:1') && a:1 ==# 'finish' && exists('a:2') && exists('a:3')
+
+            " operation cancelled
+            if a:3 == 0
+                echo "Operation cancelled..."
+            " encoding list
+            elseif a:3 > 0 && a:3 <= len(g:filelist_ecst.enccode)
+                let l:code = g:filelist_ecst.enccode[a:3 - 1]
+                execute 'write ++enc='.l:code.' '.fnameescape(substitute(expand("%:p"), '\v[\/\\]+\c', '/', 'g'))
+                execute 'set fileencoding='.l:code.''
+                silent execute 'write'
+                redraw
+                echohl FilelistPmtSuc | echo "Converted encoding to ".l:code." successfully..." | echohl None
+            " bom list
+            elseif a:3 > len(g:filelist_ecst.enccode) && a:3 <= (len(g:filelist_ecst.enccode) + len(g:filelist_ecst.bomcode))
+                let l:code = g:filelist_ecst.bomcode[a:3 - len(g:filelist_ecst.enccode) - 1]
+                if l:code ==# 'bom_add'
+                    execute 'setlocal bomb'
+                    silent execute 'write'
+                    redraw
+                    echohl FilelistPmtSuc | echo "Add bomb header to file successfully..." | echohl None
+                elseif l:code ==# 'bom_rmv'
+                    execute 'setlocal nobomb'
+                    silent execute 'write'
+                    redraw
+                    echohl FilelistPmtSuc | echo "Remove bomb header from file successfully..." | echohl None
+                endif
+            " incorrect operation
+            else
+                echo "Incorrect operation cancelled..."
+            endif
+            " close popup window
+            call popup_close(a:2)
+
+        elseif exists('a:1') && a:1 ==# 'run'
+
+            let l:orig_winidn = win_getid()
+            " check is special
+            if filelist#IsSpecial(bufnr('%'))
+                let l:basic_winidn = get(filter(map(range(1, winnr('$')), 'win_getid(v:val)'), '!filelist#IsSpecial(winbufnr(win_id2win(v:val)))'), 0, -1)
+                if l:basic_winidn != -1 && win_id2win(l:basic_winidn) != 0
+                    call win_gotoid(l:basic_winidn)
+                endif
+            endif
+            " check not special
+            if !filelist#IsSpecial(bufnr('%'))
+
+                " prompt file not saved
+                let l:prompt_sav = "This file is not save yet..."
+
+                " get filepath
+                let l:curr_file = expand('%:p')
+                if empty(l:curr_file)
+                    echohl FilelistPmtErr | echo l:prompt_sav | echohl None
+                else
+
+                    " reset variable
+                    let g:filelist_ecst.enccode = []
+                    let g:filelist_ecst.encshow = []
+                    let g:filelist_ecst.bomcode = []
+                    let g:filelist_ecst.bomshow = []
+                    let g:filelist_ecst.index = 0
+
+                    " set encoding list
+                    let g:filelist_ecst.enccode = split(&fileencodings, ',')
+                    for il in range(len(g:filelist_ecst.enccode))
+                        call add(g:filelist_ecst.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_ecst.enccode[il]))
+                    endfor
+
+                    " set bom list
+                    call add(g:filelist_ecst.bomcode, 'bom_add')
+                    call add(g:filelist_ecst.bomshow, printf("%2s: Add bomb header to file", len(g:filelist_ecst.enccode) + 1))
+                    call add(g:filelist_ecst.bomcode, 'bom_rmv')
+                    call add(g:filelist_ecst.bomshow, printf("%2s: Remove bomb header from file", len(g:filelist_ecst.enccode) + 2))
+
+                    " set options
+                    " \ 'borderchars': ['─', '│', '─', '│', '┌', '┐', '┘', '└'],
+                    let l:options = {
+                                \ 'filter': function('filelist#EncSaveto'),
+                                \ 'title': '',
+                                \ 'highlight': 'PopupNotification',
+                                \ 'border': [1, 1, 1, 1],
+                                \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                \ 'borderhighlight': ['PopupNotification'],
+                                \ 'scrollbar': 1,
+                                \ 'scrollbarhighlight': 'PmenuSbar',
+                                \ 'thumbhighlight': 'PmenuThumb',
+                                \ 'pos': 'center',
+                                \ 'fixed': 1,
+                                \ 'flip': 1,
+                                \ 'wrap': 0,
+                                \ 'padding': [0, 2, 0, 2],
+                                \ 'minwidth': 60,
+                                \ 'maxwidth': 100,
+                                \ 'minheight': 10,
+                                \ 'maxheight': 30,
+                                \ 'zindex': 100,
+                                \ 'cursorline': 0,
+                                \ 'mapping': 0
+                                \ }
+
+                    " create popup win
+                    let g:filelist_ecst.winid = popup_create('', l:options)
+                    if g:filelist_ecst.winid > 0
+                        call filelist#EncSaveto('update', g:filelist_ecst.winid)
+                    endif
+
+                endif
+            endif
+
+            " back win
+            if l:orig_winidn != 0 && win_id2win(l:orig_winidn) != 0
+                call win_gotoid(l:orig_winidn)
+            endif
+
+        elseif exists('a:1') && exists('a:2')
+
+            " get the length and selected index
+            let l:showlen = len(g:filelist_ecst.encshow) + len(g:filelist_ecst.bomshow)
+            let l:lastidx = g:filelist_ecst.index
+
+            " get the number of descr
+            let l:descr_count = len(g:filelist_ecst.descr)
+
+            " handle up arrow or 'k' key - move up
+            if a:2 == "\<Up>" || a:2 == 'k'
+                let g:filelist_ecst.index = (g:filelist_ecst.index - 1 + l:showlen) % l:showlen
+                if g:filelist_ecst.index != l:lastidx
+                    call filelist#EncSaveto('update', a:1)
+                endif
+            " handle down arrow or 'j' key - move down
+            elseif a:2 == "\<Down>" || a:2 == 'j'
+                let g:filelist_ecst.index = (g:filelist_ecst.index + 1) % l:showlen
+                if g:filelist_ecst.index != l:lastidx
+                    call filelist#EncSaveto('update', a:1)
+                endif
+            " handle enter key - confirm selection
+            elseif a:2 == "\<CR>"
+                call filelist#EncSaveto('finish', a:1, g:filelist_ecst.index + 1)
+            " handle mouse click events
+            elseif a:2 == "\<LeftMouse>" || a:2 == "\<2-LeftMouse>"
+                let l:mouse_pos = getmousepos()
+                if !empty(l:mouse_pos) && has_key(l:mouse_pos, 'line')
+                    let l:clicked_line = l:mouse_pos.line
+                    if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
+                        let g:filelist_ecst.index = l:clicked_line - l:descr_count - 1
+                        call filelist#EncSaveto('update', a:1)
+                        let l:wid = a:1
+                        let l:selected_idx = g:filelist_ecst.index
+                        call timer_start(300, {-> filelist#EncSaveto('finish', l:wid, l:selected_idx + 1)})
+                    endif
+                endif
+            " handle esc key - cancel
+            elseif a:2 == "\<Esc>"
+                call filelist#EncSaveto('finish', a:1, 0)
+            endif
+
+            " indicate already handled
+            return 1
+
+        endif
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#EncOpenas
+    " --------------------------------------------------
+    function! filelist#EncOpenas(...) abort
+        if exists('a:1') && a:1 ==# 'update' && exists('a:2')
+
+            " add descr text to display list
+            let l:show_data = []
+            let l:descr_count = len(g:filelist_ecoa.descr)
+            let l:popup_width = winwidth(a:2)
+            call extend(l:show_data, g:filelist_ecoa.descr)
+
+            " iterate through all options to build display lines
+            for il in range(len(g:filelist_ecoa.encshow))
+                " selected option shows icon
+                if il == g:filelist_ecoa.index
+                    let l:base_text = ' ' . g:filelist_ecoa.icon . ' ' . g:filelist_ecoa.encshow[il]
+                else
+                    let l:base_text = '   ' . g:filelist_ecoa.encshow[il]
+                endif
+                " pad all lines with spaces
+                let l:text_len = strdisplaywidth(l:base_text)
+                if l:text_len < l:popup_width
+                    call add(l:show_data, l:base_text . repeat(' ', l:popup_width - l:text_len))
+                else
+                    call add(l:show_data, l:base_text)
+                endif
+            endfor
+
+            " update popup window content
+            call popup_settext(a:2, l:show_data)
+
+            " remove previous highlight matches
+            for id in g:filelist_ecoa.matchid
+                silent! call matchdelete(id, a:2)
+            endfor
+            let g:filelist_ecoa.matchid = []
+
+            " add highlight for currently selected line
+            let l:cursor_line = l:descr_count + g:filelist_ecoa.index + 1
+            let l:pattern = '\%' . l:cursor_line . 'l.*'
+            let l:match_id = matchadd('PmenuSel', l:pattern, 20, -1, {'window': a:2})
+            call add(g:filelist_ecoa.matchid, l:match_id)
+
+            " move cursor to selected line
+            call win_execute(a:2, 'call cursor(' . l:cursor_line . ', 1)')
+
+        elseif exists('a:1') && a:1 ==# 'finish' && exists('a:2') && exists('a:3')
+
+            " operation cancelled
+            if a:3 == 0
+                echo "Operation cancelled..."
+            " encoding list
+            elseif a:3 > 0 && a:3 <= len(g:filelist_ecoa.enccode)
+                let l:code = g:filelist_ecoa.enccode[a:3 - 1]
+                execute 'edit ++enc='.l:code.' '.fnameescape(substitute(expand("%:p"), '\v[\/\\]+\c', '/', 'g'))
+                execute 'setlocal noreadonly'
+                redraw
+                echohl FilelistPmtSuc | echo "Reopen with encoding ".l:code." successfully..." | echohl None
+            " incorrect operation
+            else
+                echo "Incorrect operation cancelled..."
+            endif
+            " close popup window
+            call popup_close(a:2)
+
+        elseif exists('a:1') && a:1 ==# 'run'
+
+            let l:orig_winidn = win_getid()
+            " check is special
+            if filelist#IsSpecial(bufnr('%'))
+                let l:basic_winidn = get(filter(map(range(1, winnr('$')), 'win_getid(v:val)'), '!filelist#IsSpecial(winbufnr(win_id2win(v:val)))'), 0, -1)
+                if l:basic_winidn != -1 && win_id2win(l:basic_winidn) != 0
+                    call win_gotoid(l:basic_winidn)
+                endif
+            endif
+            " check not special
+            if !filelist#IsSpecial(bufnr('%'))
+
+                " prompt file not saved
+                let l:prompt_sav = "This file is not save yet..."
+
+                " get filepath
+                let l:curr_file = expand('%:p')
+                if empty(l:curr_file)
+                    echohl FilelistPmtErr | echo l:prompt_sav | echohl None
+                else
+
+                    " reset variable
+                    let g:filelist_ecoa.enccode = []
+                    let g:filelist_ecoa.encshow = []
+                    let g:filelist_ecoa.index = 0
+
+                    " set encoding list
+                    let g:filelist_ecoa.enccode = split(&fileencodings, ',')
+                    for il in range(len(g:filelist_ecoa.enccode))
+                        call add(g:filelist_ecoa.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_ecoa.enccode[il]))
+                    endfor
+
+                    " set options
+                    " \ 'borderchars': ['─', '│', '─', '│', '┌', '┐', '┘', '└'],
+                    let l:options = {
+                                \ 'filter': function('filelist#EncOpenas'),
+                                \ 'title': '',
+                                \ 'highlight': 'PopupNotification',
+                                \ 'border': [1, 1, 1, 1],
+                                \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                \ 'borderhighlight': ['PopupNotification'],
+                                \ 'scrollbar': 1,
+                                \ 'scrollbarhighlight': 'PmenuSbar',
+                                \ 'thumbhighlight': 'PmenuThumb',
+                                \ 'pos': 'center',
+                                \ 'fixed': 1,
+                                \ 'flip': 1,
+                                \ 'wrap': 0,
+                                \ 'padding': [0, 2, 0, 2],
+                                \ 'minwidth': 60,
+                                \ 'maxwidth': 100,
+                                \ 'minheight': 10,
+                                \ 'maxheight': 30,
+                                \ 'zindex': 100,
+                                \ 'cursorline': 0,
+                                \ 'mapping': 0
+                                \ }
+
+                    " create popup win
+                    let g:filelist_ecoa.winid = popup_create('', l:options)
+                    if g:filelist_ecoa.winid > 0
+                        call filelist#EncOpenas('update', g:filelist_ecoa.winid)
+                    endif
+
+                endif
+            endif
+
+            " back win
+            if l:orig_winidn != 0 && win_id2win(l:orig_winidn) != 0
+                call win_gotoid(l:orig_winidn)
+            endif
+
+        elseif exists('a:1') && exists('a:2')
+
+            " get the length and selected index
+            let l:showlen = len(g:filelist_ecoa.encshow)
+            let l:lastidx = g:filelist_ecoa.index
+
+            " get the number of descr
+            let l:descr_count = len(g:filelist_ecoa.descr)
+
+            " handle up arrow or 'k' key - move up
+            if a:2 == "\<Up>" || a:2 == 'k'
+                let g:filelist_ecoa.index = (g:filelist_ecoa.index - 1 + l:showlen) % l:showlen
+                if g:filelist_ecoa.index != l:lastidx
+                    call filelist#EncOpenas('update', a:1)
+                endif
+            " handle down arrow or 'j' key - move down
+            elseif a:2 == "\<Down>" || a:2 == 'j'
+                let g:filelist_ecoa.index = (g:filelist_ecoa.index + 1) % l:showlen
+                if g:filelist_ecoa.index != l:lastidx
+                    call filelist#EncOpenas('update', a:1)
+                endif
+            " handle enter key - confirm selection
+            elseif a:2 == "\<CR>"
+                call filelist#EncOpenas('finish', a:1, g:filelist_ecoa.index + 1)
+            " handle mouse click events
+            elseif a:2 == "\<LeftMouse>" || a:2 == "\<2-LeftMouse>"
+                let l:mouse_pos = getmousepos()
+                if !empty(l:mouse_pos) && has_key(l:mouse_pos, 'line')
+                    let l:clicked_line = l:mouse_pos.line
+                    if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
+                        let g:filelist_ecoa.index = l:clicked_line - l:descr_count - 1
+                        call filelist#EncOpenas('update', a:1)
+                        let l:wid = a:1
+                        let l:selected_idx = g:filelist_ecoa.index
+                        call timer_start(300, {-> filelist#EncOpenas('finish', l:wid, l:selected_idx + 1)})
+                    endif
+                endif
+            " handle esc key - cancel
+            elseif a:2 == "\<Esc>"
+                call filelist#EncOpenas('finish', a:1, 0)
+            endif
+
+            " indicate already handled
+            return 1
+
+        endif
+    endfunction
+
+    " --------------------------------------------------
+    " filelist#CopyRight
+    " --------------------------------------------------
+    function! filelist#CopyRight(...)
+        let l:prompt_result = ''
+
+        let l:orig_winidn = win_getid()
+        " check is special
+        if filelist#IsSpecial(bufnr('%'))
+            let l:basic_winidn = get(filter(map(range(1, winnr('$')), 'win_getid(v:val)'), '!filelist#IsSpecial(winbufnr(win_id2win(v:val)))'), 0, -1)
+            if l:basic_winidn != -1 && win_id2win(l:basic_winidn) != 0
+                call win_gotoid(l:basic_winidn)
+            endif
+        endif
+        " check not special
+        if !filelist#IsSpecial(bufnr('%'))
+
+            " env list
+            let l:filename         = expand("%:t")
+            let l:datetime         = strftime("%Y-%m-%d %H:%M:%S")
+            let l:dateyear         = strftime("%Y")
+
+            let l:check_copyright  = 0
+            let l:check_sameauthor = 0
+            let l:line_program     = 0
+            let l:line_copyright   = 0
+            let l:line_total       = line('$')
+            let l:prompt_item      = {}
+
+            let g:filelist_cprt.cpywidth  = max([g:filelist_cprt.cpywidth, 78])
+
+            " parse content
+            let l:i = 1
+            while l:i <= l:line_total
+                let l:content = getline(l:i)
+                " check copyright
+                if l:content =~ '\v^\s*(\/\*|\*|\+|\|).*$\c'
+                    if l:content =~ '\v^.*Author\:\s*'.CheckSlash('string', g:filelist_cprt.nickname).'\s*\(' . CheckSlash('string', g:filelist_cprt.fullname) . '\)\s*\<' . CheckSlash('string', g:filelist_cprt.mailaddr) . '\>.*$\c'
+                        let l:check_sameauthor = 1
+                    endif
+                    let l:check_copyright = 1
+                    let l:line_copyright = l:i
+                    let l:i = l:i + 1
+                " check progtype
+                elseif !empty(g:filelist_cprt.progtype) && l:content =~ '\v^\s*('.join(map(copy(g:filelist_cprt.progtype), 'CheckSlash(''string'', v:val)'), "|").').*$\c'
+                    if l:line_program ==# 0
+                        let l:line_program = l:i
+                    endif
+                    let l:i = l:i + 1
+                " check blankline
+                elseif l:content =~ '\v^\s*$\c'
+                    let l:i = l:i + 1
+                else
+                    break
+                endif
+            endwhile
+
+            " process content
+            let l:var_list = {
+                        \ 'NICKNAME': g:filelist_cprt.nickname,
+                        \ 'FULLNAME': g:filelist_cprt.fullname,
+                        \ 'MAILADDR': g:filelist_cprt.mailaddr,
+                        \ 'FILENAME': l:filename,
+                        \ 'DATETIME': l:datetime,
+                        \ 'DATEYEAR': l:dateyear
+                        \ }
+
+            if exists('a:1') && (a:1 ==# 'add' || a:1 ==# 1)
+                if l:check_copyright != 1
+                    let l:add_content = []
+                    for l:content in g:filelist_cprt.tplcrcon
+                        " replace varlist
+                        for [l:key, l:value] in items(l:var_list)
+                            let l:content = substitute(l:content, '\[' . l:key . '\]', l:value, 'g')
+                        endfor
+                        " replace space
+                        if l:content =~ '\[' . ' *' . '\]'
+                            let l:before_align = matchstr(l:content, '^.*\ze\[' . ' *' . '\]')
+                            let l:after_align = matchstr(l:content, '\[' . ' *' . '\]\zs.*$')
+                            let l:needed_spaces = g:filelist_cprt.cpywidth - strlen(l:before_align) - strlen(l:after_align)
+                            if l:needed_spaces < 0
+                                let l:content = l:before_align . ' ' . l:after_align
+                            elseif l:needed_spaces ==# 0
+                                let l:content = l:before_align . l:after_align
+                            else
+                                let l:content = l:before_align . repeat(' ', l:needed_spaces) . l:after_align
+                            endif
+                        endif
+                        call add(l:add_content, l:content)
+                    endfor
+                    call append(l:line_program, l:add_content)
+                    echohl HlPmtSuc | echo "Add Copyright successfully..." | echohl None
+                else
+                    echohl HlPmtErr | echo "Already have copyright..." | echohl None
+                endif
+            else
+                if l:check_copyright ==# 1 && l:check_sameauthor ==# 1
+                    let l:i = 1
+                    while l:i <= l:line_copyright
+                        let l:content = getline(l:i)
+                        " update Id
+                        if l:content =~ '\v\$Id\:.*Exp\s*\$[ \t\[\]]*\c'
+                            let l:content = substitute(l:content,
+                                        \ '\v\$Id\:.*Exp\s*\$[ \t\[\]]*\c',
+                                        \ '\="$Id: ".l:filename." ".l:datetime." ".g:filelist_cprt.nickname." Exp $[ ]"',
+                                        \ 'g')
+                            let l:prompt_item['Filename'] = 1
+                            let l:prompt_item['Datetime'] = 1
+                        " update Copyright
+                        elseif l:content =~ '\vCopyright\s*\(c\)\s*(\d{4})\-\d{4}\s*.*\(.*\)\.[ \t\[\]]*\c'
+                            let l:content = substitute(l:content,
+                                        \ '\vCopyright\s*\(c\)\s*(\d{4})\-\d{4}\s*.*\(.*\)\.[ \t\[\]]*\c',
+                                        \ '\="Copyright (c) ".submatch(1)."-".l:dateyear." ".g:filelist_cprt.nickname."(".g:filelist_cprt.fullname.").[ ]"',
+                                        \ 'g')
+                            let l:prompt_item['Copydate'] = 1
+                        " update Filename
+                        elseif l:content =~ '\vThis source file is\s*[^ ]*\.[ \t\[\]]*\c'
+                            let l:content = substitute(l:content,
+                                        \ '\vThis source file is\s*[^ ]*\.[ \t\[\]]*\c',
+                                        \ '\="This source file is ".l:filename.".[ ]"',
+                                        \ 'g')
+                            let l:prompt_item['Intrfile'] = 1
+                        endif
+                        " replace space
+                        if l:content =~ '\[' . ' *' . '\]'
+                            let l:before_align = matchstr(l:content, '^.*\ze\[' . ' *' . '\]')
+                            let l:after_align = matchstr(l:content, '\[' . ' *' . '\]\zs.*$')
+                            let l:needed_spaces = g:filelist_cprt.cpywidth - strlen(l:before_align) - strlen(l:after_align)
+                            if l:needed_spaces < 0
+                                let l:content = l:before_align . ' ' . l:after_align
+                            elseif l:needed_spaces ==# 0
+                                let l:content = l:before_align . l:after_align
+                            else
+                                let l:content = l:before_align . repeat(' ', l:needed_spaces) . l:after_align
+                            endif
+                        endif
+                        call setline(l:i, l:content)
+                        let l:i = l:i + 1
+                    endwhile
+                    if !empty(l:prompt_item)
+                        let l:prompt_result = "Successful: Update " . join(keys(l:prompt_item), ",") . " successfully..."
+                    endif
+                endif
+            endif
+        endif
+
+        " back win
+        if l:orig_winidn != 0 && win_id2win(l:orig_winidn) != 0
+            call win_gotoid(l:orig_winidn)
+        endif
+
+        return l:prompt_result
+    endfunction
+
+    " --------------------------------------------------
     " filelist_cmd_bas
     " --------------------------------------------------
     augroup filelist_cmd_bas
@@ -2366,8 +2369,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
     command! -nargs=? FilelistClose call filelist#Close()
     command! -nargs=? FilelistToggle call filelist#Toggle()
     command! -nargs=? FilelistLocateFile call filelist#LocateFile()
-    command! -nargs=? FilelistEncsaveTo call filelist#EncsaveTo()
-    command! -nargs=? FilelistEncopenAs call filelist#EncopenAs()
+    command! -nargs=? FilelistEncSaveto call filelist#EncSaveto('run')
+    command! -nargs=? FilelistEncOpenas call filelist#EncOpenas('run')
     command! -nargs=? FilelistCopyRight call filelist#CopyRight(<q-args>)
 
 endif
