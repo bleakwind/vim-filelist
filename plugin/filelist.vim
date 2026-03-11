@@ -1956,11 +1956,6 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 endif
             endif
 
-            " back win
-            if l:orig_winidn != 0 && win_id2win(l:orig_winidn) != 0
-                call win_gotoid(l:orig_winidn)
-            endif
-
         elseif exists('a:1') && exists('a:2')
 
             " get the length and selected index
@@ -2141,11 +2136,6 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                     endif
 
                 endif
-            endif
-
-            " back win
-            if l:orig_winidn != 0 && win_id2win(l:orig_winidn) != 0
-                call win_gotoid(l:orig_winidn)
             endif
 
         elseif exists('a:1') && exists('a:2')
