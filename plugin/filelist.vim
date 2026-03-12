@@ -66,45 +66,41 @@ let g:filelist_icon.helplist_title  = get(g:filelist_icon, 'helplist_title',  nr
 
 " file type
 let g:filelist_type                 = get(g:, 'filelist_type',                {})
-let g:filelist_type.file_mp3        = get(g:filelist_type, 'file_mp3',        { 'icon': nr2char(0x1F3B5), 'ext': ['mp3'] })
-let g:filelist_type.file_mp4        = get(g:filelist_type, 'file_mp4',        { 'icon': nr2char(0x1F3AC), 'ext': ['mp4'] })
-let g:filelist_type.file_php        = get(g:filelist_type, 'file_php',        { 'icon': nr2char(0x1F418), 'ext': ['php'] })
-let g:filelist_type.file_java       = get(g:filelist_type, 'file_java',       { 'icon': nr2char(0x2615),  'ext': ['java'] })
-let g:filelist_type.file_python     = get(g:filelist_type, 'file_python',     { 'icon': nr2char(0x1F40D), 'ext': ['py'] })
-let g:filelist_type.file_csharp     = get(g:filelist_type, 'file_csharp',     { 'icon': nr2char(0x1F3AF), 'ext': ['cs'] })
-let g:filelist_type.file_c          = get(g:filelist_type, 'file_c',          { 'icon': nr2char(0x1F1E8), 'ext': ['c'] })
-let g:filelist_type.file_cpp        = get(g:filelist_type, 'file_cpp',        { 'icon': nr2char(0x1F1E8), 'ext': ['cpp', 'cxx', 'h', 'hpp'] })
-let g:filelist_type.file_kotlin     = get(g:filelist_type, 'file_kotlin',     { 'icon': nr2char(0x1F1F0), 'ext': ['kt', 'kts'] })
-let g:filelist_type.file_go         = get(g:filelist_type, 'file_go',         { 'icon': nr2char(0x1F9AB), 'ext': ['go'] })
-let g:filelist_type.file_swift      = get(g:filelist_type, 'file_swift',      { 'icon': nr2char(0x1F54A), 'ext': ['swift'] })
-let g:filelist_type.file_dart       = get(g:filelist_type, 'file_dart',       { 'icon': nr2char(0x1F680), 'ext': ['dart'] })
-let g:filelist_type.file_rust       = get(g:filelist_type, 'file_rust',       { 'icon': nr2char(0x1F1F7), 'ext': ['rs'] })
-let g:filelist_type.file_ruby       = get(g:filelist_type, 'file_ruby',       { 'icon': nr2char(0x1F48E), 'ext': ['rb'] })
-let g:filelist_type.file_perl       = get(g:filelist_type, 'file_perl',       { 'icon': nr2char(0x1F42A), 'ext': ['pl', 'pm'] })
-let g:filelist_type.file_lua        = get(g:filelist_type, 'file_lua',        { 'icon': nr2char(0x1F319), 'ext': ['lua'] })
-let g:filelist_type.file_shell      = get(g:filelist_type, 'file_shell',      { 'icon': nr2char(0x1F41A), 'ext': ['sh', 'bash', 'zsh'] })
-let g:filelist_type.file_markdown   = get(g:filelist_type, 'file_markdown',   { 'icon': nr2char(0x1F5D2), 'ext': ['md', 'markdown'] })
-let g:filelist_type.file_matlab     = get(g:filelist_type, 'file_matlab',     { 'icon': nr2char(0x1F9EE), 'ext': ['m'] })
-let g:filelist_type.file_r          = get(g:filelist_type, 'file_r',          { 'icon': nr2char(0x1F4CA), 'ext': ['r', 'rmd'] })
-let g:filelist_type.file_powershell = get(g:filelist_type, 'file_powershell', { 'icon': nr2char(0x1F1F5), 'ext': ['psl'] })
-let g:filelist_type.file_makefile   = get(g:filelist_type, 'file_makefile',   { 'icon': nr2char(0x1F1F2), 'ext': ['mk','mkfile'] })
-let g:filelist_type.file_sql        = get(g:filelist_type, 'file_sql',        { 'icon': nr2char(0x1F5C4), 'ext': ['sql'] })
-let g:filelist_type.file_javascript = get(g:filelist_type, 'file_javascript', { 'icon': nr2char(0x1F1EF), 'ext': ['js'] })
-let g:filelist_type.file_typescript = get(g:filelist_type, 'file_typescript', { 'icon': nr2char(0x1F1F9), 'ext': ['ts', 'tsx'] })
-let g:filelist_type.file_html       = get(g:filelist_type, 'file_html',       { 'icon': nr2char(0x1F310), 'ext': ['html', 'htm'] })
-let g:filelist_type.file_css        = get(g:filelist_type, 'file_css',        { 'icon': nr2char(0x1F3A8), 'ext': ['css'] })
-let g:filelist_type.file_json       = get(g:filelist_type, 'file_json',       { 'icon': nr2char(0x1F4C3), 'ext': ['json'] })
-let g:filelist_type.file_xml        = get(g:filelist_type, 'file_xml',        { 'icon': nr2char(0x1F4F0), 'ext': ['xml'] })
-let g:filelist_type.file_yaml       = get(g:filelist_type, 'file_yaml',       { 'icon': nr2char(0x1F4CB), 'ext': ['yaml', 'yml'] })
+let g:filelist_type.file_mp3        = get(g:filelist_type, 'file_mp3',        {'icon': nr2char(0x1F3B5), 'ext': ['mp3']})
+let g:filelist_type.file_mp4        = get(g:filelist_type, 'file_mp4',        {'icon': nr2char(0x1F3AC), 'ext': ['mp4']})
+let g:filelist_type.file_php        = get(g:filelist_type, 'file_php',        {'icon': nr2char(0x1F418), 'ext': ['php']})
+let g:filelist_type.file_java       = get(g:filelist_type, 'file_java',       {'icon': nr2char(0x2615),  'ext': ['java']})
+let g:filelist_type.file_python     = get(g:filelist_type, 'file_python',     {'icon': nr2char(0x1F40D), 'ext': ['py']})
+let g:filelist_type.file_csharp     = get(g:filelist_type, 'file_csharp',     {'icon': nr2char(0x1F3AF), 'ext': ['cs']})
+let g:filelist_type.file_c          = get(g:filelist_type, 'file_c',          {'icon': nr2char(0x1F1E8), 'ext': ['c']})
+let g:filelist_type.file_cpp        = get(g:filelist_type, 'file_cpp',        {'icon': nr2char(0x1F1E8), 'ext': ['cpp', 'cxx', 'h', 'hpp']})
+let g:filelist_type.file_kotlin     = get(g:filelist_type, 'file_kotlin',     {'icon': nr2char(0x1F1F0), 'ext': ['kt', 'kts']})
+let g:filelist_type.file_go         = get(g:filelist_type, 'file_go',         {'icon': nr2char(0x1F9AB), 'ext': ['go']})
+let g:filelist_type.file_swift      = get(g:filelist_type, 'file_swift',      {'icon': nr2char(0x1F54A), 'ext': ['swift']})
+let g:filelist_type.file_dart       = get(g:filelist_type, 'file_dart',       {'icon': nr2char(0x1F680), 'ext': ['dart']})
+let g:filelist_type.file_rust       = get(g:filelist_type, 'file_rust',       {'icon': nr2char(0x1F1F7), 'ext': ['rs']})
+let g:filelist_type.file_ruby       = get(g:filelist_type, 'file_ruby',       {'icon': nr2char(0x1F48E), 'ext': ['rb']})
+let g:filelist_type.file_perl       = get(g:filelist_type, 'file_perl',       {'icon': nr2char(0x1F42A), 'ext': ['pl', 'pm']})
+let g:filelist_type.file_lua        = get(g:filelist_type, 'file_lua',        {'icon': nr2char(0x1F319), 'ext': ['lua']})
+let g:filelist_type.file_shell      = get(g:filelist_type, 'file_shell',      {'icon': nr2char(0x1F41A), 'ext': ['sh', 'bash', 'zsh']})
+let g:filelist_type.file_markdown   = get(g:filelist_type, 'file_markdown',   {'icon': nr2char(0x1F5D2), 'ext': ['md', 'markdown']})
+let g:filelist_type.file_matlab     = get(g:filelist_type, 'file_matlab',     {'icon': nr2char(0x1F9EE), 'ext': ['m']})
+let g:filelist_type.file_r          = get(g:filelist_type, 'file_r',          {'icon': nr2char(0x1F4CA), 'ext': ['r', 'rmd']})
+let g:filelist_type.file_powershell = get(g:filelist_type, 'file_powershell', {'icon': nr2char(0x1F1F5), 'ext': ['psl']})
+let g:filelist_type.file_makefile   = get(g:filelist_type, 'file_makefile',   {'icon': nr2char(0x1F1F2), 'ext': ['mk','mkfile']})
+let g:filelist_type.file_sql        = get(g:filelist_type, 'file_sql',        {'icon': nr2char(0x1F5C4), 'ext': ['sql']})
+let g:filelist_type.file_javascript = get(g:filelist_type, 'file_javascript', {'icon': nr2char(0x1F1EF), 'ext': ['js']})
+let g:filelist_type.file_typescript = get(g:filelist_type, 'file_typescript', {'icon': nr2char(0x1F1F9), 'ext': ['ts', 'tsx']})
+let g:filelist_type.file_html       = get(g:filelist_type, 'file_html',       {'icon': nr2char(0x1F310), 'ext': ['html', 'htm']})
+let g:filelist_type.file_css        = get(g:filelist_type, 'file_css',        {'icon': nr2char(0x1F3A8), 'ext': ['css']})
+let g:filelist_type.file_json       = get(g:filelist_type, 'file_json',       {'icon': nr2char(0x1F4C3), 'ext': ['json']})
+let g:filelist_type.file_xml        = get(g:filelist_type, 'file_xml',        {'icon': nr2char(0x1F4F0), 'ext': ['xml']})
+let g:filelist_type.file_yaml       = get(g:filelist_type, 'file_yaml',       {'icon': nr2char(0x1F4CB), 'ext': ['yaml', 'yml']})
 
 " encoding save to
 let g:filelist_ecst                 = get(g:, 'filelist_ecst',                {})
 let g:filelist_ecst.icon            = get(g:filelist_ecst, 'icon',            nr2char(0x23F5))
-let g:filelist_ecst.descr           = get(g:filelist_ecst, 'descr',           [
-            \ 'Please select your encoding save this file...',
-            \ 'Encoding list:',
-            \ ''
-            \ ])
+let g:filelist_ecst.descr           = get(g:filelist_ecst, 'descr',           ['Please select your encoding save this file...', 'Encoding list:', ''])
 let g:filelist_ecst.index           = get(g:filelist_ecst, 'index',           0)
 let g:filelist_ecst.winid           = get(g:filelist_ecst, 'winid',           0)
 let g:filelist_ecst.matchid         = get(g:filelist_ecst, 'matchid',         [])
@@ -116,11 +112,7 @@ let g:filelist_ecst.bomshow         = get(g:filelist_ecst, 'bomshow',         []
 " encoding open as
 let g:filelist_ecoa                 = get(g:, 'filelist_ecoa',                {})
 let g:filelist_ecoa.icon            = get(g:filelist_ecoa, 'icon',            nr2char(0x23F5))
-let g:filelist_ecoa.descr           = get(g:filelist_ecoa, 'descr',           [
-            \ 'Please select your encoding reopen this file...',
-            \ 'Encoding list:',
-            \ ''
-            \ ])
+let g:filelist_ecoa.descr           = get(g:filelist_ecoa, 'descr',           ['Please select your encoding reopen this file...', 'Encoding list:', ''])
 let g:filelist_ecoa.index           = get(g:filelist_ecoa, 'index',           0)
 let g:filelist_ecoa.winid           = get(g:filelist_ecoa, 'winid',           0)
 let g:filelist_ecoa.matchid         = get(g:filelist_ecoa, 'matchid',         [])
@@ -165,32 +157,32 @@ let s:filelist_bmfile               = g:filelist_datapath.'/bookmark'
 let s:filelist_bmdata               = {}
 let s:filelist_helpstate            = 0
 let s:filelist_helpdata             = get(s:, 'filelist_helpdata', [
-            \ { 'key': 'o/<CR>     ', 'des': '' },
-            \ { 'key': '',            'des': 'Open file/folder or toggle folder expansion' },
-            \ { 'key': 'SingleClick', 'des': '' },
-            \ { 'key': '',            'des': 'Selects file/folder and highlights it' },
-            \ { 'key': 'DoubleClick', 'des': '' },
-            \ { 'key': '',            'des': 'Open file/folder or toggle folder expansion' },
-            \ { 'key': 'MarkClick  ', 'des': '' },
-            \ { 'key': '',            'des': 'Expand or collapse folders' },
-            \ { 'key': 'C          ', 'des': '' },
-            \ { 'key': '',            'des': 'Set current folder as main path' },
-            \ { 'key': 'U          ', 'des': '' },
-            \ { 'key': '',            'des': 'Move up one folder level' },
-            \ { 'key': 'R          ', 'des': '' },
-            \ { 'key': '',            'des': 'Refresh the file list' },
-            \ { 'key': 'E          ', 'des': '' },
-            \ { 'key': '',            'des': 'Open in external program' },
-            \ { 'key': '.          ', 'des': '' },
-            \ { 'key': '',            'des': 'Toggle display hidden file/folder' },
-            \ { 'key': 'B          ', 'des': '' },
-            \ { 'key': '',            'des': 'Toggle display bookmark' },
-            \ { 'key': 'mi         ', 'des': '' },
-            \ { 'key': '',            'des': 'Add current file/folder to bookmarks' },
-            \ { 'key': 'md         ', 'des': '' },
-            \ { 'key': '',            'des': 'Delete selected file/folder from bookmark' },
-            \ { 'key': '?          ', 'des': '' },
-            \ { 'key': '',            'des': 'Toggle display help message' },
+            \ {'key': 'o/<CR>     ', 'des': ''},
+            \ {'key': '',            'des': 'Open file/folder or toggle folder expansion'},
+            \ {'key': 'SingleClick', 'des': ''},
+            \ {'key': '',            'des': 'Selects file/folder and highlights it'},
+            \ {'key': 'DoubleClick', 'des': ''},
+            \ {'key': '',            'des': 'Open file/folder or toggle folder expansion'},
+            \ {'key': 'MarkClick  ', 'des': ''},
+            \ {'key': '',            'des': 'Expand or collapse folders'},
+            \ {'key': 'C          ', 'des': ''},
+            \ {'key': '',            'des': 'Set current folder as main path'},
+            \ {'key': 'U          ', 'des': ''},
+            \ {'key': '',            'des': 'Move up one folder level'},
+            \ {'key': 'R          ', 'des': ''},
+            \ {'key': '',            'des': 'Refresh the file list'},
+            \ {'key': 'E          ', 'des': ''},
+            \ {'key': '',            'des': 'Open in external program'},
+            \ {'key': '.          ', 'des': ''},
+            \ {'key': '',            'des': 'Toggle display hidden file/folder'},
+            \ {'key': 'B          ', 'des': ''},
+            \ {'key': '',            'des': 'Toggle display bookmark'},
+            \ {'key': 'mi         ', 'des': ''},
+            \ {'key': '',            'des': 'Add current file/folder to bookmarks'},
+            \ {'key': 'md         ', 'des': ''},
+            \ {'key': '',            'des': 'Delete selected file/folder from bookmark'},
+            \ {'key': '?          ', 'des': ''},
+            \ {'key': '',            'des': 'Toggle display help message'},
             \ ])
 
 " ============================================================================
