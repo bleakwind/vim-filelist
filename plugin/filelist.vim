@@ -1,7 +1,7 @@
 "  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4: */
 "
 "  +-------------------------------------------------------------------------+
-"  | $Id: filelist.vim 2026-03-13 18:35:55 Bleakwind Exp $                   |
+"  | $Id: filelist.vim 2026-03-13 18:45:13 Bleakwind Exp $                   |
 "  +-------------------------------------------------------------------------+
 "  | Copyright (c) 2008-2026 Bleakwind(Rick Wu).                             |
 "  +-------------------------------------------------------------------------+
@@ -2211,7 +2211,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
             let l:tplcrcon_cur = []
             let l:tplcrcon_chk = ''
-            if index(["sh", "yaml"], &filetype) >= 0
+            if index(["sh", "yaml", "text"], &filetype) >= 0
                 for line in g:filelist_cprt.tplcrcon
                     let new_line = substitute(line, '\v^(\/\*\*|\/\*\ |\ \*\/|\ \*\ )(.*)$\c', '#  \2', '')
                     call add(l:tplcrcon_cur, new_line)
