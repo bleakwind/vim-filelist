@@ -1,9 +1,9 @@
 " vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4: */
 "
 " +--------------------------------------------------------------------------+
-" | $Id: filelist.vim 2025-07-12 05:37:12 Bleakwind Exp $                    |
+" | $Id: filelist.vim 2026-03-13 09:24:02 Bleakwind Exp $                    |
 " +--------------------------------------------------------------------------+
-" | Copyright (c) 2008-2025 Bleakwind(Rick Wu).                              |
+" | Copyright (c) 2008-2026 Bleakwind(Rick Wu).                              |
 " +--------------------------------------------------------------------------+
 " | This source file is filelist.vim.                                        |
 " | This source file is release under BSD license.                           |
@@ -1842,7 +1842,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
             " operation cancelled
             if a:3 == 0
-                echo "Operation cancelled..."
+                echohl FilelistPmtDef | echo "Operation cancelled..." | echohl None
             " encoding list
             elseif a:3 > 0 && a:3 <= len(g:filelist_ecst.enccode)
                 let l:code = g:filelist_ecst.enccode[a:3 - 1]
@@ -1867,7 +1867,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 endif
             " incorrect operation
             else
-                echo "Incorrect operation cancelled..."
+                echohl FilelistPmtDef | echo "Incorrect operation cancelled..." | echohl None
             endif
             " close popup window
             call popup_close(a:2)
@@ -2047,7 +2047,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
             " operation cancelled
             if a:3 == 0
-                echo "Operation cancelled..."
+                echohl FilelistPmtDef | echo "Operation cancelled..." | echohl None
             " encoding list
             elseif a:3 > 0 && a:3 <= len(g:filelist_ecoa.enccode)
                 let l:code = g:filelist_ecoa.enccode[a:3 - 1]
@@ -2057,7 +2057,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 echohl FilelistPmtSuc | echo "Reopen with encoding ".l:code." successfully..." | echohl None
             " incorrect operation
             else
-                echo "Incorrect operation cancelled..."
+                echohl FilelistPmtDef | echo "Incorrect operation cancelled..." | echohl None
             endif
             " close popup window
             call popup_close(a:2)
@@ -2209,12 +2209,25 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
             let g:filelist_cprt.cpywidth  = max([g:filelist_cprt.cpywidth, 78])
 
+            let l:tplcrcon_cur = []
+            let l:tplcrcon_chk = ''
+            if &filetype ==? "vim"
+                for line in g:filelist_cprt.tplcrcon
+                    let new_line = substitute(line, '\v^(\/\*\*|\/\*\ |\ \*\/|\ \*\ )(.*)$\c', '"  \2', '')
+                    call add(l:tplcrcon_cur, new_line)
+                endfor
+                let l:tplcrcon_chk = '\v^\s*(\").*$\c'
+            else
+                let l:tplcrcon_cur = g:filelist_cprt.tplcrcon
+                let l:tplcrcon_chk = '\v^\s*(\/\*|\*\/|\*).*$\c'
+            endif
+
             " parse content
             let l:i = 1
             while l:i <= l:line_total
                 let l:content = getline(l:i)
                 " check copyright
-                if l:content =~ '\v^\s*(\/\*|\*|\+|\|).*$\c'
+                if l:content =~ l:tplcrcon_chk
                     if l:content =~ '\v^.*Author\:\s*'.CheckSlash('string', g:filelist_cprt.nickname).'\s*\(' . CheckSlash('string', g:filelist_cprt.fullname) . '\)\s*\<' . CheckSlash('string', g:filelist_cprt.mailaddr) . '\>.*$\c'
                         let l:check_sameauthor = 1
                     endif
@@ -2248,7 +2261,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             if exists('a:1') && (a:1 ==# 'add' || a:1 ==# 1)
                 if l:check_copyright != 1
                     let l:add_content = []
-                    for l:content in g:filelist_cprt.tplcrcon
+                    for l:content in l:tplcrcon_cur
                         " replace varlist
                         for [l:key, l:value] in items(l:var_list)
                             let l:content = substitute(l:content, '\[' . l:key . '\]', l:value, 'g')
@@ -2269,9 +2282,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         call add(l:add_content, l:content)
                     endfor
                     call append(l:line_program, l:add_content)
-                    echohl HlPmtSuc | echo "Add Copyright successfully..." | echohl None
+                    echohl FilelistPmtSuc | echo "Add Copyright successfully..." | echohl None
                 else
-                    echohl HlPmtErr | echo "Already have copyright..." | echohl None
+                    echohl FilelistPmtErr | echo "Already have copyright..." | echohl None
                 endif
             else
                 if l:check_copyright ==# 1 && l:check_sameauthor ==# 1
