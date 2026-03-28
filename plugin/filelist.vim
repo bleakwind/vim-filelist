@@ -1,7 +1,7 @@
 "  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4: */
 "
 "  +-------------------------------------------------------------------------+
-"  | $Id: filelist.vim 2026-03-14 06:12:37 Bleakwind Exp $                   |
+"  | $Id: filelist.vim 2026-03-28 14:58:50 Bleakwind Exp $                   |
 "  +-------------------------------------------------------------------------+
 "  | Copyright (c) 2008-2026 Bleakwind(Rick Wu).                             |
 "  +-------------------------------------------------------------------------+
@@ -99,24 +99,24 @@ let g:filelist_type.file_yaml       = get(g:filelist_type, 'file_yaml',       {'
 
 " encoding save to
 let g:filelist_ecst                 = get(g:, 'filelist_ecst',                {})
+let g:filelist_ecst.code            = get(g:filelist_ecst, 'code',            [])
 let g:filelist_ecst.icon            = get(g:filelist_ecst, 'icon',            nr2char(0x23F5))
 let g:filelist_ecst.descr           = get(g:filelist_ecst, 'descr',           ['Please select your encoding save this file...', 'Encoding list:', ''])
 let g:filelist_ecst.index           = get(g:filelist_ecst, 'index',           0)
 let g:filelist_ecst.winid           = get(g:filelist_ecst, 'winid',           0)
 let g:filelist_ecst.matchid         = get(g:filelist_ecst, 'matchid',         [])
-let g:filelist_ecst.enccode         = get(g:filelist_ecst, 'enccode',         [])
 let g:filelist_ecst.encshow         = get(g:filelist_ecst, 'encshow',         [])
 let g:filelist_ecst.bomcode         = get(g:filelist_ecst, 'bomcode',         [])
 let g:filelist_ecst.bomshow         = get(g:filelist_ecst, 'bomshow',         [])
 
 " encoding open as
 let g:filelist_ecoa                 = get(g:, 'filelist_ecoa',                {})
+let g:filelist_ecoa.code            = get(g:filelist_ecoa, 'code',            [])
 let g:filelist_ecoa.icon            = get(g:filelist_ecoa, 'icon',            nr2char(0x23F5))
 let g:filelist_ecoa.descr           = get(g:filelist_ecoa, 'descr',           ['Please select your encoding reopen this file...', 'Encoding list:', ''])
 let g:filelist_ecoa.index           = get(g:filelist_ecoa, 'index',           0)
 let g:filelist_ecoa.winid           = get(g:filelist_ecoa, 'winid',           0)
 let g:filelist_ecoa.matchid         = get(g:filelist_ecoa, 'matchid',         [])
-let g:filelist_ecoa.enccode         = get(g:filelist_ecoa, 'enccode',         [])
 let g:filelist_ecoa.encshow         = get(g:filelist_ecoa, 'encshow',         [])
 let g:filelist_ecoa.bomcode         = get(g:filelist_ecoa, 'bomcode',         [])
 let g:filelist_ecoa.bomshow         = get(g:filelist_ecoa, 'bomshow',         [])
@@ -1845,16 +1845,16 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             if a:3 == 0
                 echohl FilelistPmtDef | echo "Operation cancelled..." | echohl None
             " encoding list
-            elseif a:3 > 0 && a:3 <= len(g:filelist_ecst.enccode)
-                let l:code = g:filelist_ecst.enccode[a:3 - 1]
+            elseif a:3 > 0 && a:3 <= len(g:filelist_ecst.code)
+                let l:code = g:filelist_ecst.code[a:3 - 1]
                 execute 'write ++enc='.l:code.' '.fnameescape(substitute(expand("%:p"), '\v[\/\\]+\c', '/', 'g'))
                 execute 'set fileencoding='.l:code.''
                 silent execute 'write'
                 redraw
                 echohl FilelistPmtSuc | echo "Converted encoding to ".l:code." successfully..." | echohl None
             " bom list
-            elseif a:3 > len(g:filelist_ecst.enccode) && a:3 <= (len(g:filelist_ecst.enccode) + len(g:filelist_ecst.bomcode))
-                let l:code = g:filelist_ecst.bomcode[a:3 - len(g:filelist_ecst.enccode) - 1]
+            elseif a:3 > len(g:filelist_ecst.code) && a:3 <= (len(g:filelist_ecst.code) + len(g:filelist_ecst.bomcode))
+                let l:code = g:filelist_ecst.bomcode[a:3 - len(g:filelist_ecst.code) - 1]
                 if l:code ==# 'bom_add'
                     execute 'setlocal bomb'
                     silent execute 'write'
@@ -1896,23 +1896,27 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 else
 
                     " reset variable
-                    let g:filelist_ecst.enccode = []
                     let g:filelist_ecst.encshow = []
                     let g:filelist_ecst.bomcode = []
                     let g:filelist_ecst.bomshow = []
                     let g:filelist_ecst.index = 0
 
                     " set encoding list
-                    let g:filelist_ecst.enccode = split(&fileencodings, ',')
-                    for il in range(len(g:filelist_ecst.enccode))
-                        call add(g:filelist_ecst.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_ecst.enccode[il]))
+                    if type(g:filelist_ecst.code) == type('') && g:filelist_ecst.code != ''
+                        let g:filelist_ecst.code = filter(map(split(g:filelist_ecst.code, ','), 'trim(v:val)'), 'v:val != ""')
+                    endif
+                    if empty(g:filelist_ecst.code)
+                        let g:filelist_ecst.code = split(&fileencodings, ',')
+                    endif
+                    for il in range(len(g:filelist_ecst.code))
+                        call add(g:filelist_ecst.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_ecst.code[il]))
                     endfor
 
                     " set bom list
                     call add(g:filelist_ecst.bomcode, 'bom_add')
-                    call add(g:filelist_ecst.bomshow, printf("%2s: Add bomb header to file", len(g:filelist_ecst.enccode) + 1))
+                    call add(g:filelist_ecst.bomshow, printf("%2s: Add bomb header to file", len(g:filelist_ecst.code) + 1))
                     call add(g:filelist_ecst.bomcode, 'bom_rmv')
-                    call add(g:filelist_ecst.bomshow, printf("%2s: Remove bomb header from file", len(g:filelist_ecst.enccode) + 2))
+                    call add(g:filelist_ecst.bomshow, printf("%2s: Remove bomb header from file", len(g:filelist_ecst.code) + 2))
 
                     " set options
                     " \ 'borderchars': ['─', '│', '─', '│', '┌', '┐', '┘', '└'],
@@ -2050,8 +2054,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             if a:3 == 0
                 echohl FilelistPmtDef | echo "Operation cancelled..." | echohl None
             " encoding list
-            elseif a:3 > 0 && a:3 <= len(g:filelist_ecoa.enccode)
-                let l:code = g:filelist_ecoa.enccode[a:3 - 1]
+            elseif a:3 > 0 && a:3 <= len(g:filelist_ecoa.code)
+                let l:code = g:filelist_ecoa.code[a:3 - 1]
                 execute 'edit ++enc='.l:code.' '.fnameescape(substitute(expand("%:p"), '\v[\/\\]+\c', '/', 'g'))
                 execute 'setlocal noreadonly'
                 redraw
@@ -2086,14 +2090,18 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 else
 
                     " reset variable
-                    let g:filelist_ecoa.enccode = []
                     let g:filelist_ecoa.encshow = []
                     let g:filelist_ecoa.index = 0
 
                     " set encoding list
-                    let g:filelist_ecoa.enccode = split(&fileencodings, ',')
-                    for il in range(len(g:filelist_ecoa.enccode))
-                        call add(g:filelist_ecoa.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_ecoa.enccode[il]))
+                    if type(g:filelist_ecoa.code) == type('') && g:filelist_ecoa.code != ''
+                        let g:filelist_ecoa.code = filter(map(split(g:filelist_ecoa.code, ','), 'trim(v:val)'), 'v:val != ""')
+                    endif
+                    if empty(g:filelist_ecoa.code)
+                        let g:filelist_ecoa.code = split(&fileencodings, ',')
+                    endif
+                    for il in range(len(g:filelist_ecoa.code))
+                        call add(g:filelist_ecoa.encshow, printf("%2s: Convert encoding to %s", il + 1, g:filelist_ecoa.code[il]))
                     endfor
 
                     " set options

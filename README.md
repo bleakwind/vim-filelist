@@ -77,6 +77,20 @@ let g:filelist_hglg.helplistkey = '#EEBE77'
 let g:filelist_hglg.helplistdes = '#A1ACA3'
 ```
 
+Encoding Saveto
+```vim
+let g:filelist_ecst = {}
+" Coding list (default: [], will use &fileencodings)
+let g:filelist_ecst.code = ['utf-8', 'gbk']
+```
+
+Encoding Openas
+```vim
+let g:filelist_ecoa = {}
+" Coding list (default: [], will use &fileencodings)
+let g:filelist_ecoa.code = ['utf-8', 'gbk']
+```
+
 Copyright Management
 ```vim
 let g:filelist_cprt = {}
