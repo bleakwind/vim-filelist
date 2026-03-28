@@ -1,7 +1,7 @@
 "  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4: */
 "
 "  +-------------------------------------------------------------------------+
-"  | $Id: filelist.vim 2026-03-28 14:58:50 Bleakwind Exp $                   |
+"  | $Id: filelist.vim 2026-03-28 15:04:07 Bleakwind Exp $                   |
 "  +-------------------------------------------------------------------------+
 "  | Copyright (c) 2008-2026 Bleakwind(Rick Wu).                             |
 "  +-------------------------------------------------------------------------+
@@ -48,13 +48,13 @@ let g:filelist_hglg.helplisttitle   = get(g:filelist_hglg, 'helplisttitle',   '#
 let g:filelist_hglg.helplistkey     = get(g:filelist_hglg, 'helplistkey',     '#EEBE77')
 let g:filelist_hglg.helplistdes     = get(g:filelist_hglg, 'helplistdes',     '#A1ACA3')
 
-" file mark
+" fold and file mark
 let g:filelist_mark                 = get(g:, 'filelist_mark',                {})
 let g:filelist_mark.collapsed       = get(g:filelist_mark, 'collapsed',       nr2char(0x23F5))
 let g:filelist_mark.expanded        = get(g:filelist_mark, 'expanded',        nr2char(0x23F7))
 let g:filelist_mark.reserve         = get(g:filelist_mark, 'reserve',         ' ')
 
-" file icon
+" fold and file icon
 let g:filelist_icon                 = get(g:, 'filelist_icon',                {})
 let g:filelist_icon.fold_close      = get(g:filelist_icon, 'fold_close',      nr2char(0x1F4C1))
 let g:filelist_icon.fold_open       = get(g:filelist_icon, 'fold_open',       nr2char(0x1F4C2))
@@ -64,7 +64,7 @@ let g:filelist_icon.file_symlink    = get(g:filelist_icon, 'file_symlink',    nr
 let g:filelist_icon.bmlist_title    = get(g:filelist_icon, 'bmlist_title',    nr2char(0x1F1E7))
 let g:filelist_icon.helplist_title  = get(g:filelist_icon, 'helplist_title',  nr2char(0x1F1ED))
 
-" file type
+" fold and file type
 let g:filelist_type                 = get(g:, 'filelist_type',                {})
 let g:filelist_type.file_mp3        = get(g:filelist_type, 'file_mp3',        {'icon': nr2char(0x1F3B5), 'ext': ['mp3']})
 let g:filelist_type.file_mp4        = get(g:filelist_type, 'file_mp4',        {'icon': nr2char(0x1F3AC), 'ext': ['mp4']})
