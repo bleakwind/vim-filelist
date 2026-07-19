@@ -1,7 +1,7 @@
 "  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4: */
 "
 "  +-------------------------------------------------------------------------+
-"  | $Id: filelist.vim 2026-03-28 15:04:07 Bleakwind Exp $                   |
+"  | $Id: filelist.vim 2026-07-20 03:22:33 Bleakwind Exp $                   |
 "  +-------------------------------------------------------------------------+
 "  | Copyright (c) 2008-2026 Bleakwind(Rick Wu).                             |
 "  +-------------------------------------------------------------------------+
@@ -1785,7 +1785,21 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             let l:show_data = []
             let l:descr_count = len(g:filelist_ecst.descr)
             let l:popup_width = winwidth(a:2)
-            call extend(l:show_data, g:filelist_ecst.descr)
+
+            " iterate through all descr to build display lines
+            for il in range(len(g:filelist_ecst.descr))
+                let l:base_text = g:filelist_ecst.descr[il]
+                let l:text_len = strdisplaywidth(l:base_text)
+                let l:text_cutlen = l:popup_width - 8
+                let l:text_suffix = (il == 0 ? '  [X]' : '     ')
+                if l:text_len < l:text_cutlen
+                    call add(l:show_data, l:base_text . repeat(' ', l:text_cutlen - l:text_len) . '   ' . l:text_suffix)
+                elseif l:text_len > l:text_cutlen
+                    call add(l:show_data, l:base_text[:l:text_cutlen - 1] . '...' . l:text_suffix)
+                else
+                    call add(l:show_data, l:base_text . '   ' . l:text_suffix)
+                endif
+            endfor
 
             " iterate through all options to build display lines
             for il in range(len(g:filelist_ecst.encshow))
@@ -1924,19 +1938,20 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                                 \ 'filter': function('filelist#EncSaveto'),
                                 \ 'title': '',
                                 \ 'highlight': 'PopupNotification',
-                                \ 'border': [1, 1, 1, 1],
+                                \ 'border': [0, 0, 0, 0],
                                 \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
                                 \ 'borderhighlight': ['PopupNotification'],
                                 \ 'scrollbar': 1,
                                 \ 'scrollbarhighlight': 'PmenuSbar',
                                 \ 'thumbhighlight': 'PmenuThumb',
+                                \ 'close': 'none',
                                 \ 'pos': 'center',
                                 \ 'fixed': 1,
                                 \ 'flip': 1,
                                 \ 'wrap': 0,
-                                \ 'padding': [0, 2, 0, 2],
+                                \ 'padding': [1, 2, 1, 2],
                                 \ 'minwidth': 60,
-                                \ 'maxwidth': 100,
+                                \ 'maxwidth': 60,
                                 \ 'minheight': 10,
                                 \ 'maxheight': 30,
                                 \ 'zindex': 100,
@@ -1958,6 +1973,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             " get the length and selected index
             let l:showlen = len(g:filelist_ecst.encshow) + len(g:filelist_ecst.bomshow)
             let l:lastidx = g:filelist_ecst.index
+            let l:popup_width = winwidth(a:1)
 
             " get the number of descr
             let l:descr_count = len(g:filelist_ecst.descr)
@@ -1982,6 +1998,17 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 let l:mouse_pos = getmousepos()
                 if !empty(l:mouse_pos) && has_key(l:mouse_pos, 'line')
                     let l:clicked_line = l:mouse_pos.line
+                    let l:clicked_col = l:mouse_pos.column
+
+                    if l:clicked_line == 1
+                        let l:x_start = l:popup_width - 2
+                        let l:x_end = l:popup_width
+                        if l:clicked_col >= l:x_start && l:clicked_col <= l:x_end
+                            call filelist#EncSaveto('finish', a:1, 0)
+                            return 1
+                        endif
+                    endif
+
                     if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
                         let g:filelist_ecst.index = l:clicked_line - l:descr_count - 1
                         call filelist#EncSaveto('update', a:1)
@@ -2011,7 +2038,21 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             let l:show_data = []
             let l:descr_count = len(g:filelist_ecoa.descr)
             let l:popup_width = winwidth(a:2)
-            call extend(l:show_data, g:filelist_ecoa.descr)
+
+            " iterate through all descr to build display lines
+            for il in range(len(g:filelist_ecoa.descr))
+                let l:base_text = g:filelist_ecoa.descr[il]
+                let l:text_len = strdisplaywidth(l:base_text)
+                let l:text_cutlen = l:popup_width - 8
+                let l:text_suffix = (il == 0 ? '  [X]' : '     ')
+                if l:text_len < l:text_cutlen
+                    call add(l:show_data, l:base_text . repeat(' ', l:text_cutlen - l:text_len) . '   ' . l:text_suffix)
+                elseif l:text_len > l:text_cutlen
+                    call add(l:show_data, l:base_text[:l:text_cutlen - 1] . '...' . l:text_suffix)
+                else
+                    call add(l:show_data, l:base_text . '   ' . l:text_suffix)
+                endif
+            endfor
 
             " iterate through all options to build display lines
             for il in range(len(g:filelist_ecoa.encshow))
@@ -2110,19 +2151,20 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                                 \ 'filter': function('filelist#EncOpenas'),
                                 \ 'title': '',
                                 \ 'highlight': 'PopupNotification',
-                                \ 'border': [1, 1, 1, 1],
+                                \ 'border': [0, 0, 0, 0],
                                 \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
                                 \ 'borderhighlight': ['PopupNotification'],
                                 \ 'scrollbar': 1,
                                 \ 'scrollbarhighlight': 'PmenuSbar',
                                 \ 'thumbhighlight': 'PmenuThumb',
+                                \ 'close': 'none',
                                 \ 'pos': 'center',
                                 \ 'fixed': 1,
                                 \ 'flip': 1,
                                 \ 'wrap': 0,
-                                \ 'padding': [0, 2, 0, 2],
+                                \ 'padding': [1, 2, 1, 2],
                                 \ 'minwidth': 60,
-                                \ 'maxwidth': 100,
+                                \ 'maxwidth': 60,
                                 \ 'minheight': 10,
                                 \ 'maxheight': 30,
                                 \ 'zindex': 100,
@@ -2144,6 +2186,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             " get the length and selected index
             let l:showlen = len(g:filelist_ecoa.encshow)
             let l:lastidx = g:filelist_ecoa.index
+            let l:popup_width = winwidth(a:1)
 
             " get the number of descr
             let l:descr_count = len(g:filelist_ecoa.descr)
@@ -2168,6 +2211,17 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 let l:mouse_pos = getmousepos()
                 if !empty(l:mouse_pos) && has_key(l:mouse_pos, 'line')
                     let l:clicked_line = l:mouse_pos.line
+                    let l:clicked_col = l:mouse_pos.column
+
+                    if l:clicked_line == 1
+                        let l:x_start = l:popup_width - 2
+                        let l:x_end = l:popup_width
+                        if l:clicked_col >= l:x_start && l:clicked_col <= l:x_end
+                            call filelist#EncSaveto('finish', a:1, 0)
+                            return 1
+                        endif
+                    endif
+
                     if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
                         let g:filelist_ecoa.index = l:clicked_line - l:descr_count - 1
                         call filelist#EncOpenas('update', a:1)
