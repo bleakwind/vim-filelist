@@ -1,7 +1,7 @@
 "  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4: */
 "
 "  +-------------------------------------------------------------------------+
-"  | $Id: filelist.vim 2026-07-20 18:47:26 Bleakwind Exp $                   |
+"  | $Id: filelist.vim 2026-07-20 21:50:52 Bleakwind Exp $                   |
 "  +-------------------------------------------------------------------------+
 "  | Copyright (c) 2008-2026 Bleakwind(Rick Wu).                             |
 "  +-------------------------------------------------------------------------+
@@ -100,8 +100,9 @@ let g:filelist_type.file_yaml       = get(g:filelist_type, 'file_yaml',       {'
 " encoding save to
 let g:filelist_ecst                 = get(g:, 'filelist_ecst',                {})
 let g:filelist_ecst.code            = get(g:filelist_ecst, 'code',            [])
-let g:filelist_ecst.icon            = get(g:filelist_ecst, 'icon',            nr2char(0x23F5))
 let g:filelist_ecst.descr           = get(g:filelist_ecst, 'descr',           ['Please select your encoding save this file...', 'Encoding list:', ''])
+let g:filelist_ecst.clsicon         = get(g:filelist_ecst, 'clsicon',         nr2char(0x00D7))
+let g:filelist_ecst.curicon         = get(g:filelist_ecst, 'curicon',         nr2char(0x23F5))
 let g:filelist_ecst.index           = get(g:filelist_ecst, 'index',           0)
 let g:filelist_ecst.winid           = get(g:filelist_ecst, 'winid',           0)
 let g:filelist_ecst.matchid         = get(g:filelist_ecst, 'matchid',         [])
@@ -112,8 +113,9 @@ let g:filelist_ecst.bomshow         = get(g:filelist_ecst, 'bomshow',         []
 " encoding open as
 let g:filelist_ecoa                 = get(g:, 'filelist_ecoa',                {})
 let g:filelist_ecoa.code            = get(g:filelist_ecoa, 'code',            [])
-let g:filelist_ecoa.icon            = get(g:filelist_ecoa, 'icon',            nr2char(0x23F5))
 let g:filelist_ecoa.descr           = get(g:filelist_ecoa, 'descr',           ['Please select your encoding reopen this file...', 'Encoding list:', ''])
+let g:filelist_ecoa.clsicon         = get(g:filelist_ecoa, 'clsicon',         nr2char(0x00D7))
+let g:filelist_ecoa.curicon         = get(g:filelist_ecoa, 'curicon',         nr2char(0x23F5))
 let g:filelist_ecoa.index           = get(g:filelist_ecoa, 'index',           0)
 let g:filelist_ecoa.winid           = get(g:filelist_ecoa, 'winid',           0)
 let g:filelist_ecoa.matchid         = get(g:filelist_ecoa, 'matchid',         [])
@@ -1792,7 +1794,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 let l:base_text = g:filelist_ecst.descr[il]
                 let l:text_len = strdisplaywidth(l:base_text)
                 let l:text_cutlen = l:popup_width - 8
-                let l:text_suffix = (il == 0 ? '  [X]' : '     ')
+                let l:text_suffix = (il == 0 ? '   ' . g:filelist_ecst.clsicon : '     ')
                 if l:text_len < l:text_cutlen
                     call add(l:show_data, l:base_text . repeat(' ', l:text_cutlen - l:text_len) . '   ' . l:text_suffix)
                 elseif l:text_len > l:text_cutlen
@@ -1806,7 +1808,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             for il in range(len(g:filelist_ecst.encshow))
                 " selected option shows icon
                 if il == g:filelist_ecst.index
-                    let l:base_text = ' ' . g:filelist_ecst.icon . ' ' . g:filelist_ecst.encshow[il]
+                    let l:base_text = ' ' . g:filelist_ecst.curicon . ' ' . g:filelist_ecst.encshow[il]
                 else
                     let l:base_text = '   ' . g:filelist_ecst.encshow[il]
                 endif
@@ -1823,7 +1825,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             for il in range(len(g:filelist_ecst.bomshow))
                 " selected option shows icon
                 if (len(g:filelist_ecst.encshow) + il) == g:filelist_ecst.index
-                    let l:base_text = ' ' . g:filelist_ecst.icon . ' ' . g:filelist_ecst.bomshow[il]
+                    let l:base_text = ' ' . g:filelist_ecst.curicon . ' ' . g:filelist_ecst.bomshow[il]
                 else
                     let l:base_text = '   ' . g:filelist_ecst.bomshow[il]
                 endif
@@ -2013,11 +2015,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                     let l:clicked_col = l:mouse_pos.column
 
                     if l:clicked_line == 1
-                        let l:x_start = l:popup_width - 2
+                        let l:x_start = l:popup_width - strwidth(g:filelist_ecst.clsicon) + 1
                         let l:x_end = l:popup_width
                         if l:clicked_col >= l:x_start && l:clicked_col <= l:x_end
                             call filelist#EncSaveto('finish', a:1, 0)
-                            return 1
                         endif
                     endif
 
@@ -2057,7 +2058,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                 let l:base_text = g:filelist_ecoa.descr[il]
                 let l:text_len = strdisplaywidth(l:base_text)
                 let l:text_cutlen = l:popup_width - 8
-                let l:text_suffix = (il == 0 ? '  [X]' : '     ')
+                let l:text_suffix = (il == 0 ? '   ' . g:filelist_ecoa.clsicon : '     ')
                 if l:text_len < l:text_cutlen
                     call add(l:show_data, l:base_text . repeat(' ', l:text_cutlen - l:text_len) . '   ' . l:text_suffix)
                 elseif l:text_len > l:text_cutlen
@@ -2071,7 +2072,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             for il in range(len(g:filelist_ecoa.encshow))
                 " selected option shows icon
                 if il == g:filelist_ecoa.index
-                    let l:base_text = ' ' . g:filelist_ecoa.icon . ' ' . g:filelist_ecoa.encshow[il]
+                    let l:base_text = ' ' . g:filelist_ecoa.curicon . ' ' . g:filelist_ecoa.encshow[il]
                 else
                     let l:base_text = '   ' . g:filelist_ecoa.encshow[il]
                 endif
@@ -2238,11 +2239,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                     let l:clicked_col = l:mouse_pos.column
 
                     if l:clicked_line == 1
-                        let l:x_start = l:popup_width - 2
+                        let l:x_start = l:popup_width - strwidth(g:filelist_ecoa.clsicon) + 1
                         let l:x_end = l:popup_width
                         if l:clicked_col >= l:x_start && l:clicked_col <= l:x_end
                             call filelist#EncOpenas('finish', a:1, 0)
-                            return 1
                         endif
                     endif
 
