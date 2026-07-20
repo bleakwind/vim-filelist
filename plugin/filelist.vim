@@ -1,7 +1,7 @@
 "  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4: */
 "
 "  +-------------------------------------------------------------------------+
-"  | $Id: filelist.vim 2026-07-20 03:22:33 Bleakwind Exp $                   |
+"  | $Id: filelist.vim 2026-07-20 18:47:26 Bleakwind Exp $                   |
 "  +-------------------------------------------------------------------------+
 "  | Copyright (c) 2008-2026 Bleakwind(Rick Wu).                             |
 "  +-------------------------------------------------------------------------+
@@ -1783,8 +1783,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
             " add descr text to display list
             let l:show_data = []
-            let l:descr_count = len(g:filelist_ecst.descr)
+            let l:desclen = len(g:filelist_ecst.descr)
             let l:popup_width = winwidth(a:2)
+            let l:popup_height = winheight(a:1)
 
             " iterate through all descr to build display lines
             for il in range(len(g:filelist_ecst.descr))
@@ -1845,7 +1846,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             let g:filelist_ecst.matchid = []
 
             " add highlight for currently selected line
-            let l:cursor_line = l:descr_count + g:filelist_ecst.index + 1
+            let l:cursor_line = l:desclen + g:filelist_ecst.index + 1
             let l:pattern = '\%' . l:cursor_line . 'l.*'
             let l:match_id = matchadd('PmenuSel', l:pattern, 20, -1, {'window': a:2})
             call add(g:filelist_ecst.matchid, l:match_id)
@@ -1937,25 +1938,27 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                     let l:options = {
                                 \ 'filter': function('filelist#EncSaveto'),
                                 \ 'title': '',
-                                \ 'highlight': 'PopupNotification',
-                                \ 'border': [0, 0, 0, 0],
-                                \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                \ 'borderhighlight': ['PopupNotification'],
-                                \ 'scrollbar': 1,
-                                \ 'scrollbarhighlight': 'PmenuSbar',
-                                \ 'thumbhighlight': 'PmenuThumb',
                                 \ 'close': 'none',
-                                \ 'pos': 'center',
-                                \ 'fixed': 1,
+                                \ 'fixed': 0,
                                 \ 'flip': 1,
                                 \ 'wrap': 0,
-                                \ 'padding': [1, 2, 1, 2],
                                 \ 'minwidth': 60,
                                 \ 'maxwidth': 60,
                                 \ 'minheight': 10,
                                 \ 'maxheight': 30,
                                 \ 'zindex': 100,
+                                \ 'pos': 'center',
+                                \ 'line': 0,
+                                \ 'col': 0,
                                 \ 'cursorline': 0,
+                                \ 'padding': [0, 1, 0, 1],
+                                \ 'highlight': 'PopupNotification',
+                                \ 'border': [1, 1, 1, 1],
+                                \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                \ 'borderhighlight': ['PopupNotification'],
+                                \ 'scrollbar': 1,
+                                \ 'scrollbarhighlight': 'PmenuSbar',
+                                \ 'thumbhighlight': 'PmenuThumb',
                                 \ 'mapping': 0
                                 \ }
 
@@ -1971,23 +1974,32 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         elseif exists('a:1') && exists('a:2')
 
             " get the length and selected index
-            let l:showlen = len(g:filelist_ecst.encshow) + len(g:filelist_ecst.bomshow)
+            let l:totalen = len(g:filelist_ecst.descr) + len(g:filelist_ecst.encshow) + len(g:filelist_ecst.bomshow)
+            let l:desclen = len(g:filelist_ecst.descr)
+            let l:selelen = len(g:filelist_ecst.encshow) + len(g:filelist_ecst.bomshow)
+
             let l:lastidx = g:filelist_ecst.index
             let l:popup_width = winwidth(a:1)
-
-            " get the number of descr
-            let l:descr_count = len(g:filelist_ecst.descr)
+            let l:popup_height = winheight(a:1)
 
             " handle up arrow or 'k' key - move up
             if a:2 == "\<Up>" || a:2 == 'k'
-                let g:filelist_ecst.index = (g:filelist_ecst.index - 1 + l:showlen) % l:showlen
+                let g:filelist_ecst.index = (g:filelist_ecst.index - 1 + l:selelen) % l:selelen
+                let l:movelen = l:popup_height / 2
+                let l:popfirst = max([1, (l:desclen + g:filelist_ecst.index + 1) - l:movelen])
+                let l:popfirst = min([l:popfirst, l:totalen - l:popup_height + 1])
                 if g:filelist_ecst.index != l:lastidx
+                    call popup_setoptions(a:1, #{firstline: l:popfirst})
                     call filelist#EncSaveto('update', a:1)
                 endif
             " handle down arrow or 'j' key - move down
             elseif a:2 == "\<Down>" || a:2 == 'j'
-                let g:filelist_ecst.index = (g:filelist_ecst.index + 1) % l:showlen
+                let g:filelist_ecst.index = (g:filelist_ecst.index + 1) % l:selelen
+                let l:movelen = l:popup_height / 2
+                let l:popfirst = max([1, (l:desclen + g:filelist_ecst.index + 1) - l:movelen])
+                let l:popfirst = min([l:popfirst, l:totalen - l:popup_height + 1])
                 if g:filelist_ecst.index != l:lastidx
+                    call popup_setoptions(a:1, #{firstline: l:popfirst})
                     call filelist#EncSaveto('update', a:1)
                 endif
             " handle enter key - confirm selection
@@ -2009,8 +2021,8 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         endif
                     endif
 
-                    if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
-                        let g:filelist_ecst.index = l:clicked_line - l:descr_count - 1
+                    if l:clicked_line > l:desclen && l:clicked_line <= l:totalen
+                        let g:filelist_ecst.index = l:clicked_line - l:desclen - 1
                         call filelist#EncSaveto('update', a:1)
                         let l:wid = a:1
                         let l:selected_idx = g:filelist_ecst.index
@@ -2036,8 +2048,9 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
 
             " add descr text to display list
             let l:show_data = []
-            let l:descr_count = len(g:filelist_ecoa.descr)
+            let l:desclen = len(g:filelist_ecoa.descr)
             let l:popup_width = winwidth(a:2)
+            let l:popup_height = winheight(a:1)
 
             " iterate through all descr to build display lines
             for il in range(len(g:filelist_ecoa.descr))
@@ -2081,7 +2094,7 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
             let g:filelist_ecoa.matchid = []
 
             " add highlight for currently selected line
-            let l:cursor_line = l:descr_count + g:filelist_ecoa.index + 1
+            let l:cursor_line = l:desclen + g:filelist_ecoa.index + 1
             let l:pattern = '\%' . l:cursor_line . 'l.*'
             let l:match_id = matchadd('PmenuSel', l:pattern, 20, -1, {'window': a:2})
             call add(g:filelist_ecoa.matchid, l:match_id)
@@ -2150,25 +2163,27 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                     let l:options = {
                                 \ 'filter': function('filelist#EncOpenas'),
                                 \ 'title': '',
-                                \ 'highlight': 'PopupNotification',
-                                \ 'border': [0, 0, 0, 0],
-                                \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                \ 'borderhighlight': ['PopupNotification'],
-                                \ 'scrollbar': 1,
-                                \ 'scrollbarhighlight': 'PmenuSbar',
-                                \ 'thumbhighlight': 'PmenuThumb',
                                 \ 'close': 'none',
-                                \ 'pos': 'center',
-                                \ 'fixed': 1,
+                                \ 'fixed': 0,
                                 \ 'flip': 1,
                                 \ 'wrap': 0,
-                                \ 'padding': [1, 2, 1, 2],
                                 \ 'minwidth': 60,
                                 \ 'maxwidth': 60,
                                 \ 'minheight': 10,
                                 \ 'maxheight': 30,
                                 \ 'zindex': 100,
+                                \ 'pos': 'center',
+                                \ 'line': 0,
+                                \ 'col': 0,
                                 \ 'cursorline': 0,
+                                \ 'padding': [0, 1, 0, 1],
+                                \ 'highlight': 'PopupNotification',
+                                \ 'border': [1, 1, 1, 1],
+                                \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                \ 'borderhighlight': ['PopupNotification'],
+                                \ 'scrollbar': 1,
+                                \ 'scrollbarhighlight': 'PmenuSbar',
+                                \ 'thumbhighlight': 'PmenuThumb',
                                 \ 'mapping': 0
                                 \ }
 
@@ -2184,23 +2199,32 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
         elseif exists('a:1') && exists('a:2')
 
             " get the length and selected index
-            let l:showlen = len(g:filelist_ecoa.encshow)
+            let l:totalen = len(g:filelist_ecoa.descr) + len(g:filelist_ecoa.encshow) + len(g:filelist_ecoa.bomshow)
+            let l:desclen = len(g:filelist_ecoa.descr)
+            let l:selelen = len(g:filelist_ecoa.encshow) + len(g:filelist_ecoa.bomshow)
+
             let l:lastidx = g:filelist_ecoa.index
             let l:popup_width = winwidth(a:1)
-
-            " get the number of descr
-            let l:descr_count = len(g:filelist_ecoa.descr)
+            let l:popup_height = winheight(a:1)
 
             " handle up arrow or 'k' key - move up
             if a:2 == "\<Up>" || a:2 == 'k'
-                let g:filelist_ecoa.index = (g:filelist_ecoa.index - 1 + l:showlen) % l:showlen
+                let g:filelist_ecoa.index = (g:filelist_ecoa.index - 1 + l:selelen) % l:selelen
+                let l:movelen = l:popup_height / 2
+                let l:popfirst = max([1, (l:desclen + g:filelist_ecoa.index + 1) - l:movelen])
+                let l:popfirst = min([l:popfirst, l:totalen - l:popup_height + 1])
                 if g:filelist_ecoa.index != l:lastidx
+                    call popup_setoptions(a:1, #{firstline: l:popfirst})
                     call filelist#EncOpenas('update', a:1)
                 endif
             " handle down arrow or 'j' key - move down
             elseif a:2 == "\<Down>" || a:2 == 'j'
-                let g:filelist_ecoa.index = (g:filelist_ecoa.index + 1) % l:showlen
+                let g:filelist_ecoa.index = (g:filelist_ecoa.index + 1) % l:selelen
+                let l:movelen = l:popup_height / 2
+                let l:popfirst = max([1, (l:desclen + g:filelist_ecoa.index + 1) - l:movelen])
+                let l:popfirst = min([l:popfirst, l:totalen - l:popup_height + 1])
                 if g:filelist_ecoa.index != l:lastidx
+                    call popup_setoptions(a:1, #{firstline: l:popfirst})
                     call filelist#EncOpenas('update', a:1)
                 endif
             " handle enter key - confirm selection
@@ -2217,13 +2241,13 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                         let l:x_start = l:popup_width - 2
                         let l:x_end = l:popup_width
                         if l:clicked_col >= l:x_start && l:clicked_col <= l:x_end
-                            call filelist#EncSaveto('finish', a:1, 0)
+                            call filelist#EncOpenas('finish', a:1, 0)
                             return 1
                         endif
                     endif
 
-                    if l:clicked_line > l:descr_count && l:clicked_line <= l:descr_count + l:showlen
-                        let g:filelist_ecoa.index = l:clicked_line - l:descr_count - 1
+                    if l:clicked_line > l:desclen && l:clicked_line <= l:totalen
+                        let g:filelist_ecoa.index = l:clicked_line - l:desclen - 1
                         call filelist#EncOpenas('update', a:1)
                         let l:wid = a:1
                         let l:selected_idx = g:filelist_ecoa.index
