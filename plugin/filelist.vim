@@ -1,7 +1,7 @@
 "  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4: */
 "
 "  +-------------------------------------------------------------------------+
-"  | $Id: filelist.vim 2026-07-20 21:50:52 Bleakwind Exp $                   |
+"  | $Id: filelist.vim 2026-07-25 05:39:43 Bleakwind Exp $                   |
 "  +-------------------------------------------------------------------------+
 "  | Copyright (c) 2008-2026 Bleakwind(Rick Wu).                             |
 "  +-------------------------------------------------------------------------+
@@ -1954,10 +1954,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                                 \ 'col': 0,
                                 \ 'cursorline': 0,
                                 \ 'padding': [0, 1, 0, 1],
-                                \ 'highlight': 'PopupNotification',
+                                \ 'highlight': 'Popup',
                                 \ 'border': [1, 1, 1, 1],
                                 \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                \ 'borderhighlight': ['PopupNotification'],
+                                \ 'borderhighlight': ['PopupBorder'],
                                 \ 'scrollbar': 1,
                                 \ 'scrollbarhighlight': 'PmenuSbar',
                                 \ 'thumbhighlight': 'PmenuThumb',
@@ -2178,10 +2178,10 @@ if exists('g:filelist_enabled') && g:filelist_enabled ==# 1
                                 \ 'col': 0,
                                 \ 'cursorline': 0,
                                 \ 'padding': [0, 1, 0, 1],
-                                \ 'highlight': 'PopupNotification',
+                                \ 'highlight': 'Popup',
                                 \ 'border': [1, 1, 1, 1],
                                 \ 'borderchars': [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                \ 'borderhighlight': ['PopupNotification'],
+                                \ 'borderhighlight': ['PopupBorder'],
                                 \ 'scrollbar': 1,
                                 \ 'scrollbarhighlight': 'PmenuSbar',
                                 \ 'thumbhighlight': 'PmenuThumb',
